@@ -121,7 +121,7 @@ After forking, the original and the forked object both exist in the system, but 
 
 - **The forked object shadows the original (default)**:
   - The original is **hidden** from card lists and banner draws.
-  - Any deck `include_ids` that referenced the original are **automatically rewritten** to point to the forked object.
+  - Deck `include_ids` / `exclude_ids` that reference the original are redirected to the forked object **at resolution time** by the local overlay; deck files are never modified.
   - Only the forked object can be drawn.
 - **The forked object does not shadow the original**:
   - Both versions are **visible** in lists.
@@ -130,8 +130,12 @@ After forking, the original and the forked object both exist in the system, but 
 
 Users can toggle the shadow state at any time:
 
-- **Remove shadow**: The original becomes visible again, and deck references are **automatically rewritten** back to the original. Drawing immediately reflects the original version.
-- **Re-enable shadow**: The original is hidden again, and references are rewritten back to the forked object.
+- **Remove shadow**: The original becomes visible again, and references resolve back to the original. Drawing immediately reflects the original version.
+- **Re-enable shadow**: The original is hidden again, and references resolve to the forked object again.
+
+> [!NOTE]
+>
+> **Reference overlay**: Reference redirections caused by shadowing are never written back to JSON files. They are stored in the local database `db/overrides.db`, with one table per object kind (Card / Deck / Logic; Card is currently active). Banner-to-deck reference overrides will be enabled together with Banner CRUD.
 
 The meaning of shadow can be summarized in one sentence: **"Which version is currently in effect"**.
 It does not change how data is stored; it only determines which version participates in list display and drawing.
@@ -145,9 +149,9 @@ It does not change how data is stored; it only determines which version particip
 After deleting a forked object:
 
 - The original **automatically becomes visible again**.
-- Deck references pointing to the forked object are **rewritten back** to the original.
+- The reference overlay is removed: deck references to the original take effect again, and deck files were never modified.
 
-In other words, deleting a forked object is equivalent to "abandoning your edits and returning to the official version". Since references are rewritten automatically, deck membership will not be invalidated by the deletion of the forked object.
+In other words, deleting a forked object is equivalent to "abandoning your edits and returning to the official version". If a deck explicitly referenced the forked object's own Id (e.g. a deck created after the fork), that reference becomes dangling, just like deleting any local card.
 
 ### 3.5 At Most One Fork per Original
 

@@ -102,10 +102,14 @@ pub struct Membership {
 
 impl Membership {
     /// 由成员规则计算得到最终成员卡片
-    /// 
+    ///
     /// # 执行顺序
     /// 1. 顺序应用全部包含型与过滤型条件 (顺序会影响结果).
     /// 2. 应用全部排除型条件 (顺序不影响结果).
+    ///
+    /// # 引用覆盖层
+    /// `include_ids` / `exclude_ids` 中的 Id 会先经 [`CardRegistry::resolve_ref`]
+    /// 解析: 被遮蔽原卡片的引用自动指向派生卡片, 卡组文件本身无需改写.
     pub fn resolve(&self, registry: &CardRegistry) -> HashSet<GlobalId> {
         let mut result = HashSet::new();
 
@@ -138,9 +142,13 @@ impl Membership {
                 },
                 MembershipCondition::IncludeIds { ids }
                     if !ids.is_empty() => {
-                        // 只保留存在的 Id
+                        // 先经过引用覆盖层解析 (被遮蔽原卡片 -> 派生卡片), 再过滤不存在的 Id
                         // 直接使用迭代器拓展, 性能更好
-                        result.extend(ids.iter().filter(|id| registry.contains_visible(**id)).copied());
+                        result.extend(
+                            ids.iter()
+                                .map(|id| registry.resolve_ref(*id))
+                                .filter(|id| registry.contains_visible(*id))
+                        );
                         // TODO[2026-10-03]: 究竟使用 contains_visible (不含遮蔽) 还是 contains_including_shadowed (含遮蔽), 需等待后续决定
                     },
                 _ => {},
@@ -151,7 +159,11 @@ impl Membership {
         for cond in &self.conditions {
             if let MembershipCondition::ExcludeIds { ids } = cond {
                 if !ids.is_empty() {
-                    result.retain(|id| !ids.contains(id));
+                    // 排除同样经过引用覆盖层解析
+                    let excluded: HashSet<GlobalId> = ids.iter()
+                        .map(|id| registry.resolve_ref(*id))
+                        .collect();
+                    result.retain(|id| !excluded.contains(id));
                 }
             }
         }
@@ -237,6 +249,10 @@ impl EventGroupCondition {
 
 impl EventGroup {
     /// 根据筛选规则计算实际包含的卡片
+    ///
+    /// # 引用覆盖层
+    /// `include_ids` / `exclude_ids` 中的 Id 会先经 [`CardRegistry::resolve_ref`]
+    /// 解析: 被遮蔽原卡片的引用自动指向派生卡片.
     pub fn resolve(&self, members: &HashSet<GlobalId>, registry: &CardRegistry) -> HashSet<GlobalId> {
         let mut result = HashSet::new();
 
@@ -275,7 +291,12 @@ impl EventGroup {
                 EventGroupCondition::IncludeIds { ids } => {
                     if !ids.is_empty() {
                         // 由于 members 中的卡片已确定存在, 活动组只需确定是否存在于 members 中
-                        result.extend(ids.iter().filter(|id| members.contains(id)).copied());
+                        // 引用同样先经过覆盖层解析
+                        result.extend(
+                            ids.iter()
+                                .map(|id| registry.resolve_ref(*id))
+                                .filter(|id| members.contains(id))
+                        );
                     }
                 },
                 EventGroupCondition::IncludeGroups { .. } | EventGroupCondition::ExcludeGroups { .. } => {
@@ -293,7 +314,10 @@ impl EventGroup {
         for cond in &self.conditions {
             if let EventGroupCondition::ExcludeIds { ids } = cond {
                 if !ids.is_empty() {
-                    result.retain(|id| !ids.contains(id));
+                    let excluded: HashSet<GlobalId> = ids.iter()
+                        .map(|id| registry.resolve_ref(*id))
+                        .collect();
+                    result.retain(|id| !excluded.contains(id));
                 }
             }
         }

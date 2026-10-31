@@ -168,6 +168,44 @@ fn membership_include_and_exclude() {
     assert_eq!(result, HashSet::from([a, c]));
 }
 
+// IncludeIds: 引用被遮蔽的原卡片时, 解析到派生卡片
+#[test]
+fn membership_include_ids_resolves_shadowed_to_derived() {
+    let registry = CardRegistry::new();
+    let original = card_in(&registry, vec![]);
+    let derived = derived_card_in(&registry, original, vec![]);
+
+    let rule = membership(vec![MembershipCondition::IncludeIds {
+        ids: HashSet::from([original]),
+    }]);
+    assert_eq!(
+        rule.resolve(&registry),
+        HashSet::from([derived]),
+        "IncludeIds 应经引用覆盖层解析到派生卡片"
+    );
+}
+
+// ExcludeIds: 排除被遮蔽的原卡片等价于排除派生卡片
+#[test]
+fn membership_exclude_ids_resolves_shadowed_to_derived() {
+    let registry = CardRegistry::new();
+    let original = card_in(&registry, vec![]);
+    let derived = derived_card_in(&registry, original, vec![]);
+
+    let rule = membership(vec![
+        MembershipCondition::IncludeIds {
+            ids: HashSet::from([derived]),
+        },
+        MembershipCondition::ExcludeIds {
+            ids: HashSet::from([original]),
+        },
+    ]);
+    assert!(
+        rule.resolve(&registry).is_empty(),
+        "排除原卡片应同时排除其派生卡片"
+    );
+}
+
 // 顺序敏感: 先 FilterTagAll 再 IncludeIds / 先 IncludeIds 再 FilterTagAll
 #[test]
 fn membership_order_sensitive() {
@@ -378,6 +416,41 @@ fn event_group_exclude_ids() {
     assert_eq!(result, HashSet::from([b]));
 }
 
+// EventGroup: IncludeIds / ExcludeIds 同样经过引用覆盖层解析
+#[test]
+fn event_group_ids_resolve_shadowed_to_derived() {
+    let registry = CardRegistry::new();
+    let original = card_in(&registry, vec![]);
+    let derived = derived_card_in(&registry, original, vec![]);
+    let members = HashSet::from([derived]);
+
+    let include = EventGroup {
+        conditions: vec![EventGroupCondition::IncludeIds {
+            ids: HashSet::from([original]),
+        }],
+    };
+    assert_eq!(
+        include.resolve(&members, &registry),
+        HashSet::from([derived]),
+        "活动组 IncludeIds 应经引用覆盖层解析"
+    );
+
+    let exclude = EventGroup {
+        conditions: vec![
+            EventGroupCondition::IncludeIds {
+                ids: HashSet::from([derived]),
+            },
+            EventGroupCondition::ExcludeIds {
+                ids: HashSet::from([original]),
+            },
+        ],
+    };
+    assert!(
+        exclude.resolve(&members, &registry).is_empty(),
+        "活动组排除原卡片应同时排除其派生卡片"
+    );
+}
+
 // EventGroup: 复杂组合 (模拟原神 up 组)
 #[test]
 fn event_group_complex() {
@@ -578,4 +651,26 @@ fn deck_query_event_group_skips_shadowed_original() {
     );
 
     assert_eq!(deck.query_cards(&registry, &[], &[EventTag::up()]), vec![derived]);
+}
+
+// 卡组显式引用被遮蔽的原卡片时, 查询结果解析为派生卡片
+#[test]
+fn deck_query_include_ids_resolves_shadowed_original() {
+    let registry = CardRegistry::new();
+    let original = card_in(&registry, vec![("game", "genshin")]);
+    let derived = derived_card_in(&registry, original, vec![("game", "genshin")]);
+
+    let deck = deck_with(
+        "Test-Deck",
+        membership(vec![MembershipCondition::IncludeIds {
+            ids: HashSet::from([original]),
+        }]),
+        HashMap::new(),
+    );
+
+    assert_eq!(
+        deck.query_cards(&registry, &[Tag::new("game", "genshin")], &[]),
+        vec![derived],
+        "卡组引用原卡片时, 抽卡查询应返回派生卡片"
+    );
 }

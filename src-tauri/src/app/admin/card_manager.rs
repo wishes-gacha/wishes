@@ -9,16 +9,17 @@
 //! - 编辑一个**只读来源** (官方 / 拓展包) 的卡片 = **分叉**: 新建一个派生对象,
 //!   内容复制自原对象, `origin` 改为 `local`, `forked_from` 指向原对象.
 //!   原对象从不被改写, 因此不存在冲突.
-//! - 所有显式引用该卡片的卡组 (`include_ids` / `exclude_ids`) 会在分叉时
-//!   **一次性重写**为指向派生对象.
+//! - 分叉/遮蔽**不写回任何卡组文件**: 卡组中对原卡片的显式引用由本地
+//!   **引用覆盖层** (`OverlayRepository`, SQLite) 在解析时重定向到派生对象.
+//!   官方数据与拓展包数据永远不会被改写.
 
 use std::{cmp::Reverse, fs, path::PathBuf, sync::Arc};
 use anyhow::{Context, Result};
-use crate::{domain::{card::{Card, TaggedCard}, deck::TaggedDeck, ids::GlobalId, localized_string::LocalizedString, origin::Origin, tag::Tag}, infrastructure::registry::{CardRegistry, DeckRegistry}, utils::{data_paths::DataPaths, path::atomic_write_json}};
+use crate::{domain::{card::{Card, TaggedCard}, deck::TaggedDeck, ids::GlobalId, localized_string::LocalizedString, origin::Origin, tag::Tag}, infrastructure::{registry::{CardRegistry, DeckRegistry}, repository::overlay_repo::{OverlayRepository, RefKind}}, utils::{data_paths::DataPaths, path::atomic_write_json}};
 
 
 /// 卡片管理器.
-/// 
+///
 /// 管理卡片的创建、查询、更新、删除, 同时管理卡片文件.
 pub struct CardManager {
     /// `CardRegistry` 引用.
@@ -26,6 +27,9 @@ pub struct CardManager {
 
     /// `DeckRegistry` 引用, 用于引用检查与分叉时的引用重定向.
     deck_registry: Arc<DeckRegistry>,
+
+    /// 引用覆盖层数据库引用, 用于持久化卡片的引用覆盖关系.
+    overlay_repo: Arc<OverlayRepository>,
 
     /// 数据目录布局.
     paths: DataPaths,
@@ -35,11 +39,13 @@ impl CardManager {
     pub fn new(
         card_registry: Arc<CardRegistry>,
         deck_registry: Arc<DeckRegistry>,
+        overlay_repo: Arc<OverlayRepository>,
         paths: DataPaths,
     ) -> Self {
         Self {
             card_registry,
             deck_registry,
+            overlay_repo,
             paths,
         }
     }
@@ -161,13 +167,13 @@ impl CardManager {
     }
 
     /// 由一个只读来源的卡片派生出一个新的本地卡片.
-    /// 
+    ///
     /// # 流程 (对应数据分叉模型)
     /// 1. 复制原对象内容, 分配新的 `global_id`.
     /// 2. `origin` 改为 `local`, `forked_from` 指向原对象.
     /// 3. 写入 `data/local/cards/`.
     /// 4. 原对象保持不变, 并在列表/抽卡查询中被**遮蔽**.
-    /// 5. 所有显式引用原卡片的卡组重写为指向派生对象.
+    /// 5. 遮蔽时在引用覆盖层登记 `原卡片 -> 派生卡片`, 卡组文件保持不变.
     pub fn fork_card_from<F>(&self, source: &TaggedCard, shadow: bool, mutable: F) -> Result<TaggedCard>
     where
         F: FnOnce(&mut TaggedCard),
@@ -199,18 +205,15 @@ impl CardManager {
         self.card_registry.insert(derived.clone());
         self.card_registry.insert_path(derived_id, path);
 
-        // let rewritten = self.redirect_card_references(source_id, derived_id);
-        let rewritten = if shadow {
-            self.redirect_card_references(source_id, derived_id)
-        } else {
-            0   // 不遮蔽: 引用保持指向原对象, 派生对象作为备份存在
-        };
-        if rewritten > 0 {
+        // 遮蔽时, 引用覆盖层把对原对象的引用解析到派生对象;
+        // 不遮蔽时引用保持指向原对象, 派生对象作为备份存在.
+        // 两种情况下都不改写任何卡组文件.
+        self.sync_ref_overrides();
+        if shadow {
             tracing::info!(
                 source_id = %source_id,
                 derived_id = %derived_id,
-                rewritten = %rewritten,
-                "Card 分叉: 已重写卡组中的显式引用"
+                "Card 分叉: 已登记引用覆盖 (不修改卡组文件)"
             );
         }
 
@@ -220,46 +223,6 @@ impl CardManager {
         );
 
         Ok(derived)
-    }
-
-    /// 把所有卡组 (含被遮蔽的卡组) 中指向 `from` 的卡片引用改写为 `to`, 并持久化改动的卡组.
-    ///
-    /// 被遮蔽的卡组仍可能被卡池引用 (卡组分叉不会自动改写 `Banner.deck_id`),
-    /// 因此引用重写不能跳过它们, 否则卡池会继续使用指向旧卡片的规则.
-    fn redirect_card_references(&self, from: GlobalId, to: GlobalId) -> usize {
-        let mut rewritten = 0;
-
-        for deck in self.deck_registry.all_including_shadowed() {
-            let mut updated = deck.as_ref().clone();
-            let count = updated.redirect_card_refs(from, to);
-            if count == 0 {
-                continue;
-            }
-
-            let path = match self.deck_registry.get_path(updated.global_id) {
-                Some(p) => p,
-                None => {
-                    tracing::warn!(deck_id = %updated.global_id, "卡组文件路径未记录, 跳过引用重写持久化");
-                    continue;
-                }
-            };
-
-            match atomic_write_json(&path, &updated, "Card") {
-                Ok(()) => {
-                    let deck_id = updated.global_id;
-                    self.deck_registry.insert(updated);
-                    self.deck_registry.insert_path(deck_id, path);
-                    rewritten += count;
-                },
-                Err(e) => tracing::warn!(
-                    deck_id = %updated.global_id,
-                    error = %e,
-                    "卡组引用重写持久化失败, 内存索引保持原状"
-                )
-            }
-        }
-
-        rewritten
     }
 
     /// 查询显式引用指定卡片的卡组列表.
@@ -348,22 +311,14 @@ impl CardManager {
 
         // 分叉关系的解除已在 CardRegistry 中处理, 此处无需考虑
 
-        // 反向重写引用, 把派生对象的引用改回原对象
+        // 引用覆盖随派生对象移除由 CardRegistry 自动解除:
+        // 指向原对象的引用重新解析到原对象, 卡组文件从未被改写.
+        self.sync_ref_overrides();
         if let Some(source) = source_id {
-            if self.card_registry.contains_including_shadowed(source) {
-                let rewritten = self.redirect_card_references(id, source);
-                if rewritten > 0 {
-                    tracing::info!(
-                        derived = %id, source = %source, rewritten,
-                        "删除派生 Card: 已将引用反向重写为原对象"
-                    )
-                }
-            } else {
-                tracing::warn!(
-                    derived = %id, source = %source,
-                    "删除派生 Card: 原对象已不存在, 跳过引用反向重写"
-                )
-            }
+            tracing::info!(
+                derived = %id, source = %source,
+                "删除派生 Card: 引用覆盖已移除, 对原对象的引用恢复生效"
+            );
         }
 
         // TODO[2026-10-14]: loader.rs 加载时可遍历检查所有派生对象的 forked_from 是否存在并记录警告
@@ -398,16 +353,25 @@ impl CardManager {
         atomic_write_json(&path, &updated, "Card")?;
         self.card_registry.insert(updated.clone());
 
-        // 根据新状态重写引用
-        let rewritten = if shadowed {
-            // 启用遮蔽: 引用指向派生
-            self.redirect_card_references(source, id)
-        } else {
-            // 撤销遮蔽: 引用指回原对象
-            self.redirect_card_references(id, source)
-        };
+        // 引用覆盖随遮蔽状态由 CardRegistry 自动维护; 不写回任何卡组文件
+        self.sync_ref_overrides();
 
-        tracing::info!(card_id = %id, shadowed, rewritten,  "设置 Card 遮蔽状态");
+        tracing::info!(card_id = %id, shadowed, source = %source, "设置 Card 遮蔽状态 (引用覆盖已更新)");
         Ok(updated)
+    }
+
+    /// 把内存中的引用覆盖快照同步到本地覆盖层数据库.
+    ///
+    /// 数据库是覆盖关系的持久化副本, 启动时会按分叉/遮蔽状态重建;
+    /// 因此这里的写入失败只记录警告, 不影响本次会话的正确性.
+    fn sync_ref_overrides(&self) {
+        let snapshot = self.card_registry.ref_overrides_snapshot();
+        if let Err(e) = self.overlay_repo.replace_all(RefKind::Card, &snapshot) {
+            tracing::warn!(
+                error = %e,
+                entries = snapshot.len(),
+                "同步卡片引用覆盖到覆盖层数据库失败"
+            );
+        }
     }
 }

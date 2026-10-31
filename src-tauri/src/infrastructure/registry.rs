@@ -202,6 +202,13 @@ pub struct CardRegistry {
 
     /// 分叉索引.
     fork_index: ForkIndex,
+
+    /// 引用覆盖层 (内存视图): 被遮蔽的原卡片 -> 当前生效的派生卡片.
+    ///
+    /// 该映射由分叉/遮蔽状态**自动维护** (见 `insert` / `remove_keep_path`),
+    /// 解析卡组中的显式卡片引用时通过 [`CardRegistry::resolve_ref`] 应用.
+    /// 持久化由 `OverlayRepository` 负责, 官方 JSON 文件永远不会被改写.
+    ref_overrides: DashMap<GlobalId, GlobalId>,
 }
 
 impl_fork_ops!(CardRegistry, TaggedCard, "TaggedCard");
@@ -220,6 +227,7 @@ impl CardRegistry {
             tag_index: TagIndex::new(),
             paths: DashMap::new(),
             fork_index: ForkIndex::new(),
+            ref_overrides: DashMap::new(),
         }
     }
 
@@ -237,12 +245,14 @@ impl CardRegistry {
     }
 
     /// 插入一张卡片, 同时加入标签索引.
-    /// 
+    ///
     /// 若已存在同 `global_id` 对象, 会先清理旧的标签索引和分叉关系.
+    /// 引用覆盖层随 `forked_from` / `shadowed` 自动更新:
+    /// 遮蔽原对象的派生卡片会登记 `原对象 -> 派生对象` 的覆盖.
     pub fn insert(&self, card: TaggedCard) {
         let id = card.global_id;
         let new_forked_from = card.forked_from;
-        // let should_shadow = card.shadowed;
+        let new_shadowed = card.shadowed;
 
         // 检查旧的标签索引, 同时取出旧的 forked_from
         let old_forked_from = if let Some(old) = self.storage.get(&id) {
@@ -257,6 +267,7 @@ impl CardRegistry {
         // 无条件解除旧的遮蔽关系, 若 shadow 为 true, 之后会重新建立
         if let Some(source) = old_forked_from {
             self.unmark_forked(source, id);
+            self.clear_ref_override_if_target(source, id);
         }
 
         let tags: Vec<Tag> = card.tags.iter().cloned().collect();
@@ -266,6 +277,10 @@ impl CardRegistry {
         // 无条件登记派生关系 (不管 shadowed 值)
         if let Some(source) = new_forked_from {
             self.mark_forked(source, id);
+            // 遮蔽原对象时, 引用覆盖层把对原对象的引用解析到派生对象
+            if new_shadowed {
+                self.ref_overrides.insert(source, id);
+            }
         }
     }
 
@@ -287,6 +302,7 @@ impl CardRegistry {
 
         if let Some(source) = card.forked_from {
             self.unmark_forked(source, id);
+            self.clear_ref_override_if_target(source, id);
         }
 
         Some(card)
@@ -324,6 +340,50 @@ impl CardRegistry {
     /// 通过 `global_id` 获取对应卡片的配置文件路径.
     pub fn get_path(&self, id: GlobalId) -> Option<PathBuf> {
         self.paths.get(&id).map(|refs| refs.clone())
+    }
+
+    /// 解析卡片引用在当前**生效**对象上的 `global_id`.
+    ///
+    /// 若 `id` 是被遮蔽的原卡片, 返回遮蔽它的派生卡片; 否则原样返回.
+    /// 卡组中的 `include_ids` / `exclude_ids` 在求值时统一经过此方法,
+    /// 从而无需改写任何卡组文件即可让分叉立即生效.
+    pub fn resolve_ref(&self, id: GlobalId) -> GlobalId {
+        // 单派生约束下至多一跳; 循环上限仅用于防御脏数据造成的环
+        const MAX_DEPTH: usize = 8;
+
+        let mut current = id;
+        for _ in 0..MAX_DEPTH {
+            match self.ref_overrides.get(&current).map(|entry| *entry.value()) {
+                Some(next) if next != current => current = next,
+                _ => break,
+            }
+        }
+        current
+    }
+
+    /// 指定卡片当前的引用覆盖目标 (若存在).
+    pub fn ref_override_of(&self, id: GlobalId) -> Option<GlobalId> {
+        self.ref_overrides.get(&id).map(|entry| *entry.value())
+    }
+
+    /// 当前登记的全部引用覆盖 `(原对象, 生效派生对象)`, 按 Id 排序.
+    ///
+    /// 用于同步到 `OverlayRepository` 持久化.
+    pub fn ref_overrides_snapshot(&self) -> Vec<(GlobalId, GlobalId)> {
+        let mut entries: Vec<(GlobalId, GlobalId)> = self
+            .ref_overrides
+            .iter()
+            .map(|entry| (*entry.key(), *entry.value()))
+            .collect();
+        entries.sort_by_key(|(from, to)| (*from, *to));
+        entries
+    }
+
+    /// 若 `source` 的覆盖目标恰为 `target`, 移除该覆盖记录.
+    ///
+    /// 用于删除或取消遮蔽派生对象: 不影响指向其他派生对象的覆盖.
+    fn clear_ref_override_if_target(&self, source: GlobalId, target: GlobalId) {
+        self.ref_overrides.remove_if(&source, |_, to| *to == target);
     }
 }
 
@@ -923,6 +983,71 @@ use super::*;
         assert!(registry.is_visible(source_id), "删除派生对象后原对象应重新出现");
         assert_eq!(registry.all_visible().len(), 1);
         assert_eq!(registry.all_visible()[0].global_id, source_id);
+    }
+
+    #[test]
+    fn shadowed_fork_registers_and_removes_ref_override() {
+        let registry = CardRegistry::new();
+        let source = card_with_tag("胡桃");
+        let source_id = source.global_id;
+        registry.insert(source);
+
+        let mut derived = card_with_tag("我的胡桃");
+        derived.forked_from = Some(source_id);
+        derived.shadowed = true;
+        let derived_id = derived.global_id;
+        registry.insert(derived);
+
+        assert_eq!(registry.resolve_ref(source_id), derived_id);
+        assert_eq!(registry.ref_override_of(source_id), Some(derived_id));
+        assert_eq!(registry.ref_overrides_snapshot(), vec![(source_id, derived_id)]);
+        assert_eq!(registry.resolve_ref(derived_id), derived_id, "派生对象自身不应被覆盖");
+
+        registry.remove_keep_path(derived_id);
+        assert_eq!(registry.resolve_ref(source_id), source_id, "删除派生对象后覆盖应解除");
+        assert!(registry.ref_overrides_snapshot().is_empty());
+    }
+
+    #[test]
+    fn unshadowed_fork_does_not_override_references() {
+        let registry = CardRegistry::new();
+        let source = card_with_tag("胡桃");
+        let source_id = source.global_id;
+        registry.insert(source);
+
+        let mut derived = card_with_tag("我的胡桃");
+        derived.forked_from = Some(source_id);
+        derived.shadowed = false;
+        registry.insert(derived);
+
+        assert_eq!(registry.resolve_ref(source_id), source_id);
+        assert!(registry.ref_override_of(source_id).is_none());
+    }
+
+    #[test]
+    fn toggling_shadow_updates_ref_override() {
+        let registry = CardRegistry::new();
+        let source = card_with_tag("胡桃");
+        let source_id = source.global_id;
+        registry.insert(source);
+
+        let mut derived = card_with_tag("我的胡桃");
+        derived.forked_from = Some(source_id);
+        derived.shadowed = true;
+        let derived_id = derived.global_id;
+        registry.insert(derived.clone());
+
+        // 取消遮蔽: 覆盖解除
+        let mut unshadowed = derived.clone();
+        unshadowed.shadowed = false;
+        registry.insert(unshadowed);
+        assert_eq!(registry.resolve_ref(source_id), source_id);
+
+        // 重新遮蔽: 覆盖恢复
+        let mut shadowed = derived.clone();
+        shadowed.shadowed = true;
+        registry.insert(shadowed);
+        assert_eq!(registry.resolve_ref(source_id), derived_id);
     }
 
     #[test]

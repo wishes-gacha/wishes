@@ -19,7 +19,10 @@ use crate::{
             DeckRegistry,
             LogicRegistry
         },
-        repository::state_repo::StateRepository
+        repository::{
+            overlay_repo::{OverlayRepository, RefKind},
+            state_repo::StateRepository
+        }
     }, interface::catalog_stats::CatalogStats, utils::data_paths::DataPaths
 };
 use super::loader::Loader;
@@ -99,10 +102,24 @@ impl AppState {
         let logic_registry = Arc::new(logic_registry);
         let banner_registry = Arc::new(banner_registry);
 
+        // 打开引用覆盖层数据库, 并按分叉/遮蔽状态重建卡片引用覆盖表.
+        // 覆盖关系完全由数据文件中的 forked_from / shadowed 推导,
+        // 重建可以自动清理陈旧记录.
+        let overlay_repository = Arc::new(OverlayRepository::new(&db_dir.join("overrides.db"))?);
+        let card_overrides = card_registry.ref_overrides_snapshot();
+        overlay_repository
+            .replace_all(RefKind::Card, &card_overrides)
+            .with_context(|| "重建卡片引用覆盖表失败")?;
+        tracing::info!(
+            card_overrides = card_overrides.len(),
+            "引用覆盖层已就绪 (官方数据文件不被改写)"
+        );
+
         // 初始化管理器
         let card_manager = CardManager::new(
             card_registry.clone(),
             deck_registry.clone(),
+            overlay_repository.clone(),
             paths.clone()
         );
         let deck_manager = DeckManager::new(

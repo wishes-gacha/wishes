@@ -53,7 +53,7 @@ The runtime state of each banner (such as pity counters) is persisted to `SQLite
 
 - **Data Fork Model**
   - Editing an object from a read-only source no longer modifies it in place. Instead, a local copy is **forked** (new `GlobalId`, `origin = local`, `forked_from` pointing to the original).
-  - A forked object can choose whether to **shadow** the original: when shadowing, the original is hidden from lists and wish queries, and deck references are rewritten to point to the forked object; unshadowing rewrites references back. Currently, cards support toggling the shadow manually, with the corresponding deck UI to be added in a later release.
+  - A forked object can choose whether to **shadow** the original: when shadowing, the original is hidden from lists and wish queries, and deck references are redirected to the forked object through the local overlay (SQLite; official files are never modified); unshadowing makes references resolve back to the original. Currently, cards support toggling the shadow manually, with the corresponding deck UI to be added in a later release.
   - Deleting a forked object restores the original to visibility automatically.
 
 - **State Scope**
