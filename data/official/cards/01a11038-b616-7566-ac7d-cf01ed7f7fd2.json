@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b616-7566-ac7d-cf01ed7f7fd2",
+  "origin": "official",
+  "content": {
+    "zh-CN": "迪希雅"
+  },
+  "tags": [
+    {
+      "namespace": "attribute",
+      "value": "pyro"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "profession",
+      "value": "claymore"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    }
+  ]
+}

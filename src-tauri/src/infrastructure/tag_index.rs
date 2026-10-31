@@ -10,13 +10,16 @@ use crate::domain::tag::Tag;
 /// 
 /// 维护从 `Tag` 到一组 Id 的映射.
 /// 适用于需要按标签快速检索对象的场景, 主要用于卡片、卡组、卡池、逻辑定义等.
+/// 
+/// 数据格式 v2 起, 实际使用的 `Id` 是 `GlobalId` (`Uuid`), 它不实现 `Copy`,
+/// 因此泛型约束使用 `Clone`.
 pub struct TagIndex<Id> {
     tag_to_ids: DashMap<Tag, HashSet<Id>>
 }
 
 impl<Id> Default for TagIndex<Id>
 where
-    Id: std::hash::Hash + Eq + Clone + Copy + Send + Sync
+    Id: std::hash::Hash + Eq + Clone + Send + Sync
 {
     fn default() -> Self {
         Self::new()
@@ -25,7 +28,7 @@ where
 
 impl<Id> TagIndex<Id>
 where
-    Id: std::hash::Hash + Eq + Clone + Copy + Send + Sync
+    Id: std::hash::Hash + Eq + Clone + Send + Sync
 {
     /// 创建空的标签索引.
     pub fn new() -> Self {
@@ -37,7 +40,7 @@ where
     /// 每个标签都会建立到该 Id 的映射.
     pub fn insert(&self, id: Id, tags: &[Tag]) {
         for tag in tags {
-            self.tag_to_ids.entry(tag.clone()).or_default().insert(id);
+            self.tag_to_ids.entry(tag.clone()).or_default().insert(id.clone());
         }
     }
 
@@ -81,7 +84,7 @@ where
         let mut result = HashSet::new();
         for tag in tags {
             if let Some(entry) = self.tag_to_ids.get(tag) {
-                result.extend(entry.value().iter().copied());
+                result.extend(entry.value().iter().cloned());
             }
         }
         result
@@ -91,7 +94,7 @@ where
     pub fn all_ids(&self) -> HashSet<Id> {
         let mut res = HashSet::new();
         for entry in self.tag_to_ids.iter() {
-            res.extend(entry.value().iter().copied());
+            res.extend(entry.value().iter().cloned());
         }
         res
     }

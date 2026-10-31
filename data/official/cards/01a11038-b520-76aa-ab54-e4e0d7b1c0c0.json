@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b520-76aa-ab54-e4e0d7b1c0c0",
+  "origin": "official",
+  "content": {
+    "zh-CN": "玲可"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "quantum"
+    },
+    {
+      "namespace": "fate",
+      "value": "abundance"
+    }
+  ]
+}

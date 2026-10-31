@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b593-705b-a29e-2e4891782d22",
+  "origin": "official",
+  "content": {
+    "zh-CN": "西风秘典"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

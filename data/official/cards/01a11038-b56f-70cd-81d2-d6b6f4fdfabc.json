@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b56f-70cd-81d2-d6b6f4fdfabc",
+  "origin": "official",
+  "content": {
+    "zh-CN": "鸦羽弓"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

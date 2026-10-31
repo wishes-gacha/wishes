@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4e2-7313-9591-9a150ea6be66",
+  "origin": "official",
+  "content": {
+    "zh-CN": "唯有沉默"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "the_hunt"
+    }
+  ]
+}

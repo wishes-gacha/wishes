@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b60b-7100-95fc-db595cd58f4e",
+  "origin": "official",
+  "content": {
+    "zh-CN": "梦见月瑞希"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

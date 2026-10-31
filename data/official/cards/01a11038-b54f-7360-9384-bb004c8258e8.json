@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b54f-7360-9384-bb004c8258e8",
+  "origin": "official",
+  "content": {
+    "zh-CN": "瓦尔特"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "imaginary"
+    },
+    {
+      "namespace": "fate",
+      "value": "nihility"
+    }
+  ]
+}

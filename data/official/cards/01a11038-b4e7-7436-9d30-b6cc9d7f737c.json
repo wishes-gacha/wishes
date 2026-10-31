@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4e7-7436-9d30-b6cc9d7f737c",
+  "origin": "official",
+  "content": {
+    "zh-CN": "天才们的休憩"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "erudition"
+    }
+  ]
+}

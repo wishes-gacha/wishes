@@ -1,4 +1,9 @@
 {
+  "locale": {
+    "zh-CN": "简体中文",
+    "en": "English",
+    "ja": "日本語"
+  },
   "common": {
     "loading": "読み込み中…",
     "open": "開く",
@@ -73,6 +78,11 @@
   "card": {
     "name": "名前",
     "namePlaceholder": "カード名を入力",
+    "nameRequired": "少なくとも1つの言語が必要です",
+    "title": "称号 / サブタイトル",
+    "titlePlaceholder": "称号を入力 (省略可)",
+    "forkedFrom": "「{name}」から派生",
+    "forkEditHint": "このカードは読み取り専用のソース由来です。編集するとローカル派生が作成されます。",
     "tags": "タグ",
     "noTags": "タグなし",
     "availableTags": "選択可能なタグ",
@@ -92,6 +102,7 @@
     "create": "＋ 新規カード",
     "edit": "編集",
     "delete": "削除",
+    "deleteSuccess": "削除しました",
     "editTitle": "カードを編集",
     "createTitle": "カードを作成",
     "save": "保存",
@@ -100,13 +111,29 @@
     "deleteConfirmContent": "カード「{name}」を削除しますか？",
     "deleteWarning": "⚠ この操作は取り消せません",
     "deleteRefDeckWarning": "このカードは以下のカードセットによって明示的に参照されており、削除後はそれらのカードセットに含まれなくなる：",
+    "deleteRefDeckForkInfo": "このカードは以下のデッキによって明示的に参照されています。削除後、これらの参照は自動的に元のカードへ書き換えられ、デッキの内容は失われません：",
+    "deleteForkRestore": "削除後、元のカード「{name}」が再び表示されます。",
+    "refDecksLoadFailed": "カードの参照一覧の取得に失敗しました: {error}",
     "detailEmpty": "カードを選択して詳細を表示",
     "noMatch": "一致するカードがありません",
     "deleteFailed": "カードの削除に失敗しました",
     "deleteError": "カードの削除に失敗しました: {error}",
     "loadFailed": "カードの読み込みに失敗しました: {error}",
     "createFailed": "カードの作成に失敗しました: {error}",
-    "updateFailed": "カードの更新に失敗しました: {error}"
+    "updateFailed": "カードの更新に失敗しました: {error}",
+    "shadowSourceLabel": "元のカードを遮蔽する",
+    "shadowSourceHint": "遮蔽すると元のカードはカード一覧に表示されなくなります（データは保持されます）",
+    "shadowedYes": "元のカードを遮蔽中",
+    "shadowedNo": "元のカードは表示中",
+    "shadowAction": "遮蔽を有効化",
+    "unshadowAction": "遮蔽を解除",
+    "shadowEnabled": "遮蔽を有効化しました。元のカードは非表示になりました",
+    "shadowDisabled": "遮蔽を解除しました。元のカードが再び表示されます",
+    "derivedExistsTitle": "このカードにはすでに派生版が存在します",
+    "derivedExistsContent": "「{name}」の派生版がすでに存在します。参照の混乱を避けるため、派生版を直接編集してください。元の内容からやり直すには、先に派生版を削除してください。",
+    "editDerivedAction": "派生版を編集",
+    "derivedNotFound": "派生版が見つかりません。一覧を更新して再試行してください。",
+    "hasDerived": "派生あり"
   },
   "logic": {
     "managerTitle": "ロジック管理"
@@ -115,6 +142,7 @@
     "managerTitle": "バナー管理"
   },
   "deck": {
+    "forkedFrom": "「{name}」から派生",
     "searchPlaceholder": "デッキを検索…",
     "totalCounter": "合計 {filtered} / {total}",
     "create": "＋ 新規デッキ",
@@ -174,5 +202,13 @@
     "up": "確率アップ",
     "fes": "フェス限定",
     "appoint": "定軌"
+  },
+  "localizedInput": {
+    "panelTitle": "他の言語を入力する"
+  },
+  "origin": {
+    "official": "公式",
+    "local": "ローカル",
+    "pack": "拡張パック: {name}"
   }
 }

@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4d4-759e-99b5-ff6e2e9114a3",
+  "origin": "official",
+  "content": {
+    "zh-CN": "一场术后对话"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "abundance"
+    }
+  ]
+}

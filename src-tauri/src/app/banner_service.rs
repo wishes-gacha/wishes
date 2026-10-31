@@ -1,23 +1,27 @@
 //! # 卡池管理和抽卡总服务
 //! 
 //! 提供卡池管理、抽卡执行、运行时状态持久化和卡池相关信息查询等功能.
+//! 
+//! # 状态作用域 (数据格式 v2)
+//! 
+//! 运行时状态不再以卡池自身为键, 而是以 `scope_key` 为键:
+//! 
+//! - `"banner:<uuid>"`: 该卡池独立维护状态 (默认).
+//! - `"group:<name>"`: 同组的多个卡池**共享**同一份状态.
+//! 
+//! 故 `states` 缓存按 `scope_key` 分片, 而非按 `BannerId`.
 
-use std::sync::Arc;
+use std::{collections::HashSet, sync::Arc};
 use anyhow::{Context, Result};
 use dashmap::DashMap;
 use rand::{SeedableRng, rngs::ChaCha12Rng, seq::IndexedRandom};
 use crate::{
-    app::logic_engine::LogicEngine,
-    domain::{
-        banner::BannerRuntimeState,
-        ids::{BannerId, UserId},
-        wish_result::WishResult,
-    },
-    infrastructure::{
+    app::logic_engine::LogicEngine, domain::{
+        banner::BannerRuntimeState, ids::{GlobalId, UserId}, wish_result::WishResult,
+    }, infrastructure::{
         registry::{BannerRegistry, CardRegistry, DeckRegistry, LogicRegistry},
         repository::state_repo::StateRepository,
-    },
-    interface::banner_info::{BannerInfo, BannerSummary},
+    }, interface::banner_info::{BannerInfo, BannerSummary},
 };
 
 
@@ -32,22 +36,27 @@ use crate::{
 pub struct BannerService {
     /// 卡片注册器引用.
     card_registry: Arc<CardRegistry>,
+
     /// 卡组注册器引用.
     deck_registry: Arc<DeckRegistry>,
+
     /// 逻辑注册器引用.
     logic_registry: Arc<LogicRegistry>,
+
     /// 卡池注册器引用.
     banner_registry: Arc<BannerRegistry>,
+
     /// 逻辑引擎引用.
     logic_engine: Arc<LogicEngine>,
+
     /// 逻辑状态数据库引用.
     state_repository: Arc<StateRepository>,
 
-    /// 每个卡池一份独立的运行时状态, 与 `Banner` 分离.
+    /// 每个**状态作用域**一份独立运行时状态, 与 `Banner` 分离.
     /// 
-    /// 使用 `DashMap` 按 `BannerId` 分片, 并发抽不同卡池互不阻塞.
-    /// 未来多用户时改为 `DashMap<(UserId, BannerId), BannerRuntimeState>`.
-    states: DashMap<BannerId, BannerRuntimeState>,
+    /// 使用 `DashMap` 按 `scope_key` 分片, 并发抽不同卡池互不阻塞.
+    /// 未来多用户时改为 `DashMap<(UserId, String), BannerRuntimeState>`.
+    states: DashMap<String, BannerRuntimeState>,
 }
 
 impl BannerService {
@@ -74,7 +83,7 @@ impl BannerService {
     /// 
     /// # 流程
     /// 1. 从 `BannerRegistry` 读取卡池 (不可变数据, 无需加锁).
-    /// 2. 从内存状态缓存中锁定该卡池的 `BannerRuntimeState`.
+    /// 2. 计算卡池的状态作用域, 从内存状态缓存中锁定对应的 `BannerRuntimeState`.
     /// 3. 读取 `total_counter`, 构造确定性随机种子.
     /// 4. 调用逻辑引擎执行抽卡逻辑, 就地更新 `state.logic_state`.
     /// 5. 根据逻辑结果查询候选卡片, 等概率随机选取一张.
@@ -86,19 +95,22 @@ impl BannerService {
     /// - 逻辑执行失败.
     /// - 候选卡片列表为空 (说明卡组未覆盖逻辑的所有可能输出).
     /// - 随机选取或状态持久化失败.
-    pub fn wish(&self, banner_id: BannerId) -> Result<WishResult> {
+    pub fn wish(&self, banner_id: GlobalId) -> Result<WishResult> {
         // 1. Banner 是不可变的, 无需加锁
-        let banner = self.banner_registry.get(banner_id)
-            .ok_or_else(|| anyhow::anyhow!("未找到 Banner: Id `{}`", banner_id.0))?;
+        let banner = self.banner_registry.get_including_shadowed(banner_id)
+            .ok_or_else(|| anyhow::anyhow!("未找到 Banner `{}`", banner_id))?;
+        
+        // 2. 计算状态作用域并锁定运行时状态
+        let scope_key = banner.state_scope_key();
 
-        // 2-3. 锁定该卡池的运行时状态
-        let mut state_guard = self.states.get_mut(&banner_id)
+        let mut state_guard = self.states.get_mut(&scope_key)
             .ok_or_else(|| anyhow::anyhow!(
-                "Banner {} 的运行时状态未初始化 (可能未调用 restore_states)",
-                banner_id.0
+                "Banner {} (scope `{}`) 的运行时状态未初始化 (可能未调用 restore_states)",
+                banner_id, scope_key
             ))?;
         let state = state_guard.value_mut();
 
+        // 3. 构造随机种子
         let total_counter = state.total_counter;
         let seed = self.build_seed("0", banner_id, total_counter); // profile 固定为 0, TODO: 后期添加多用户
         let mut rng = ChaCha12Rng::seed_from_u64(seed);
@@ -114,8 +126,8 @@ impl BannerService {
         )?;
 
         // 5. 查询候选卡片
-        let tagged_deck = self.deck_registry.get(banner.deck_id)
-            .ok_or_else(|| anyhow::anyhow!("未找到 Deck: Id `{}`", banner.deck_id.0))?;
+        let tagged_deck = self.deck_registry.get_including_shadowed(banner.deck_id)
+            .ok_or_else(|| anyhow::anyhow!("未找到 Deck `{}`", banner.deck_id))?;
 
         let candidates = tagged_deck.query_cards(
             &self.card_registry,
@@ -125,40 +137,37 @@ impl BannerService {
 
         if candidates.is_empty() {
             let member_count = tagged_deck.members.resolve(&self.card_registry).len();
+            let msg = format!(
+                "Deck {} 没有 Logic {} 匹配 Tag {:?} 和 EventTag {:?} 的 Card, 当前 Deck 成员数量: {}",
+                tagged_deck.global_id,
+                banner.logic_id,
+                result.tags,
+                result.event_tags,
+                member_count,
+            );
             tracing::error!(
-                banner_id = %banner.id.0,
-                deck_id = %tagged_deck.id.0,
-                logic_id = %banner.logic_id.0,
+                banner_id = %banner.global_id,
+                deck_id = %tagged_deck.global_id,
+                logic_id = %banner.logic_id,
                 tags = ?result.tags,
                 event_tags = ?result.event_tags,
                 member_count = %member_count,
-                "Deck {} 没有 Logic {} 匹配 Tag {:?} 和 EventTag {:?} 的 Card, 当前 Deck 成员数量: {}",
-                tagged_deck.id.0,
-                banner.logic_id.0,
-                result.tags,
-                result.event_tags,
-                member_count,
+                msg
             );
-            anyhow::bail!(
-                "Deck {} 没有 Logic {} 匹配 Tag {:?} 和 EventTag {:?} 的 Card, 当前 Deck 成员数量: {}",
-                tagged_deck.id.0,
-                banner.logic_id.0,
-                result.tags,
-                result.event_tags,
-                member_count,
-            );
+            anyhow::bail!(msg);
         }
 
         let picked_id = candidates.choose(&mut rng)
-            .ok_or_else(|| anyhow::anyhow!("随机抽取 CardId 失败!"))?;
+            .ok_or_else(|| anyhow::anyhow!("随机抽取 Card GlobalId 失败!"))?;
 
         // 6. 更新计数器并持久化
-        self.state_repository.save(UserId(0), banner_id, state)
+        // 持久化的是**修改后**的新状态
+        self.state_repository.save(UserId(0), &scope_key, &new_state)
             .with_context(|| format!("Banner {} 存储运行时状态时失败", banner_id.0))?;
         *state = new_state;     // 入库成功后, 再用副本替换原本的状态, 保证原子提交
 
         // 7. 返回结果
-        let tagged_card = self.card_registry.get(*picked_id)
+        let tagged_card = self.card_registry.get_including_shadowed(*picked_id)
             .ok_or_else(|| anyhow::anyhow!("未找到 Card: Id `{}`", picked_id.0))?;
 
         tracing::info!(
@@ -181,7 +190,7 @@ impl BannerService {
     /// 
     /// 使用 FNV-1a 算法基于 本地用户 Id, 卡池 Id, 总抽数 构建确定的随机种子.
     /// 当前 `profile` 固定为 "0" (单用户模式).
-    pub fn build_seed(&self, profile: &str, banner_id: BannerId, total_counter: u64) -> u64 {
+    pub fn build_seed(&self, profile: &str, banner_id: GlobalId, total_counter: u64) -> u64 {
         const FNV_OFFSET: u64 = 0xcbf29ce484222325;
         const FNV_PRIME:  u64 = 0x100000001b3;
 
@@ -194,70 +203,86 @@ impl BannerService {
         };
 
         mix(profile.as_bytes());
-        mix(&banner_id.0.to_le_bytes());
+        mix(banner_id.as_uuid().as_bytes());
         mix(&total_counter.to_le_bytes());
         hash
     }
 
-    /// 从数据库恢复所有卡池的运行时状态到内存缓存 `states`.
+    /// 从数据库恢复所有卡池作用域的运行时状态到内存缓存 `states`.
     /// 
-    /// 遍历 `BannerRegistry` 中的全部卡池, 逐一从 `StateRepository` 加载.
-    /// 若某卡池在数据库中尚无记录 (首次启动), 则填充默认值 (计数器 0, 逻辑状态为空).
+    /// 遍历 `BannerRegistry` 中的全部卡池, 按其 `scope_key` 去重后逐一加载.
+    /// 若某作用域在数据库中尚无记录 (首次启动), 则填充默认值
+    /// (计数器 0, 逻辑状态为空).
     /// 
     /// 应在 `BannerService` 构造完成后、首次抽卡前调用一次.
     pub fn restore_states(&self) -> Result<()> {
-        for banner_id in self.banner_registry.all_ids() {
+        let mut seen_scopes = HashSet::new();
+
+        for banner in self.banner_registry.all_including_shadowed() {
+            let scope_key = banner.state_scope_key();
+            if !seen_scopes.insert(scope_key.clone()) {
+                continue;       // 同作用域卡池共享状态, 只需加载一次
+            }
+
             let state = self.state_repository
-                .load(UserId(0), banner_id)?
+                .load(UserId(0), &scope_key)?
                 .unwrap_or_default();
-            self.states.insert(banner_id, state);
+            self.states.insert(scope_key, state);
         }
+
         Ok(())
     }
 
-    /// 获取所有卡池的摘要信息列表 `BannerSummary`, 按 Id 排序.
+    /// 获取所有**可见**卡池的摘要信息列表 `Vec<BannerSummary>`,
+    /// 按 `global_id` 排序 (相当于按创建时间排序).
+    /// 
+    /// 被派生对象遮蔽的卡池不会出现在列表中.
     pub fn get_banner_summaries(&self) -> Vec<BannerSummary> {
         let mut summaries: Vec<_> = self.banner_registry
-            .all_ids()
+            .all_visible_ids()
             .iter()
             .filter_map(|id| {
-                let banner = self.banner_registry.get(*id)?;
-                Some(BannerSummary {
-                    id: banner.id.0,
-                    name: banner.name.clone(),
-                    tags: banner.tags.iter().cloned().collect(),
-                })
+                let banner = self.banner_registry.get_including_shadowed(*id)?;
+                Some(BannerSummary::from(banner.as_ref()))
             })
             .collect();
-        summaries.sort_by_key(|s| s.id);
+
+        // Uuid v7 本身时间有序, 这里按 global_id 排序等价于按创建时间排序
+        summaries.sort_by_key(|s| s.global_id);
         summaries
     }
 
+    /// 读取某个作用域的当前总抽数.
+    fn total_counter_of(&self, scope_key: &str) -> u64 {
+        self.states
+            .get(scope_key)
+            .map(|s| s.total_counter)
+            .unwrap_or(0)
+    }
+
     /// 获取指定卡池的详细信息 `BannerInfo`.
-    pub fn get_banner_info(&self, banner_id: BannerId) -> Result<BannerInfo> {
-        let banner = self.banner_registry.get(banner_id)
-            .ok_or_else(|| anyhow::anyhow!("未找到 Banner: id {}", banner_id.0))?;
+    pub fn get_banner_info(&self, banner_id: GlobalId) -> Result<BannerInfo> {
+        let banner = self.banner_registry.get_including_shadowed(banner_id)
+            .ok_or_else(|| anyhow::anyhow!("未找到 Banner `{}`", banner_id))?;
 
         // 从内存状态缓存读取 total_counter
-        let total_counter = self.states
-            .get(&banner_id)
-            .map(|s| s.total_counter)
-            .unwrap_or(0);
+        let total_counter = self.total_counter_of(&banner.state_scope_key());
 
-        let deck = self.deck_registry.get(banner.deck_id)
-            .ok_or_else(|| anyhow::anyhow!("未找到 Deck: Id {}", banner.deck_id.0))?;
-        let deck_name = deck.name.clone();
+        let deck = self.deck_registry.get_including_shadowed(banner.deck_id)
+            .ok_or_else(|| anyhow::anyhow!("未找到 Deck `{}`", banner.deck_id))?;
 
-        let logic_def = self.logic_registry.get_definition(banner.logic_id)
-            .ok_or_else(|| anyhow::anyhow!("未找到 Logic: Id {}", banner.logic_id.0))?;
-        let logic_name = logic_def.name.clone();
+        let logic_def = self.logic_registry.get_definition_including_shadowed(banner.logic_id)
+            .ok_or_else(|| anyhow::anyhow!("未找到 Logic `{}`", banner.logic_id))?;
 
         Ok(BannerInfo {
-            id: banner.id.0,
+            global_id: banner.global_id,
             name: banner.name.clone(),
-            tags: banner.tags.iter().cloned().collect(),
-            deck_name,
-            logic_name,
+            tags: banner.sorted_tags(),
+            deck_id: deck.global_id,
+            logic_id: logic_def.global_id,
+            deck_name: deck.name.clone(),
+            logic_name: logic_def.name.clone(),
+            state_scope: banner.state_scope.clone(),
             total_counter,
         })
     }

@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b538-7293-b8b3-52d89ed04fe8",
+  "origin": "official",
+  "content": {
+    "zh-CN": "黑塔"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "fate",
+      "value": "erudition"
+    }
+  ]
+}

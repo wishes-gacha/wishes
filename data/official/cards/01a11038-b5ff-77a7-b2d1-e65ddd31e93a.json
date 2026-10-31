@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5ff-77a7-b2d1-e65ddd31e93a",
+  "origin": "official",
+  "content": {
+    "zh-CN": "雷泽"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "electro"
+    },
+    {
+      "namespace": "profession",
+      "value": "claymore"
+    }
+  ]
+}

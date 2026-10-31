@@ -1,0 +1,20 @@
+{
+  "global_id": "01a0fbfa-c5cc-725f-b912-de327d361861",
+  "origin": "official",
+  "name": {
+    "zh-CN": "赤团开时"
+  },
+  "deck_id": "01a0fbfa-c5c7-74ef-86f0-461f625d55c1",
+  "logic_id": "01a0fbfa-c5ca-7cb2-992a-71ef114f7390",
+  "state_scope": "banner",
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "event",
+      "value": "up"
+    }
+  ]
+}

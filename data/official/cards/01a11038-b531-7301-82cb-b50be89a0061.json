@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b531-7301-82cb-b50be89a0061",
+  "origin": "official",
+  "content": {
+    "zh-CN": "雪衣"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "quantum"
+    },
+    {
+      "namespace": "fate",
+      "value": "destruction"
+    }
+  ]
+}

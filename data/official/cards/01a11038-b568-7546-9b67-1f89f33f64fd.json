@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b568-7546-9b67-1f89f33f64fd",
+  "origin": "official",
+  "content": {
+    "zh-CN": "讨龙英杰谭"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

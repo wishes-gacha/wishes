@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b528-7016-9497-e52e7072f1ca",
+  "origin": "official",
+  "content": {
+    "zh-CN": "艾丝妲"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "pyro"
+    },
+    {
+      "namespace": "fate",
+      "value": "harmony"
+    }
+  ]
+}

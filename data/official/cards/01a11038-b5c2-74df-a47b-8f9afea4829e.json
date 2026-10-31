@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5c2-74df-a47b-8f9afea4829e",
+  "origin": "official",
+  "content": {
+    "zh-CN": "多莉"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "electro"
+    },
+    {
+      "namespace": "profession",
+      "value": "claymore"
+    }
+  ]
+}

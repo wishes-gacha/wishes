@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b50d-71d2-b951-713a0e4ddb61",
+  "origin": "official",
+  "content": {
+    "zh-CN": "加拉赫"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "pyro"
+    },
+    {
+      "namespace": "fate",
+      "value": "abundance"
+    }
+  ]
+}

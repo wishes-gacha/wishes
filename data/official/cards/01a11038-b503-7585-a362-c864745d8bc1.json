@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b503-7585-a362-c864745d8bc1",
+  "origin": "official",
+  "content": {
+    "zh-CN": "三月七"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "fate",
+      "value": "preservation"
+    }
+  ]
+}

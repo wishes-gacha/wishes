@@ -20,6 +20,7 @@ declare module 'vue' {
     DeckEditor: typeof import('./src/components/deck/DeckEditor.vue')['default']
     DeckManager: typeof import('./src/components/catalog/DeckManager.vue')['default']
     EventGroupModal: typeof import('./src/components/deck/EventGroupModal.vue')['default']
+    LocalizedInput: typeof import('./src/components/common/LocalizedInput.vue')['default']
     LogicManager: typeof import('./src/components/catalog/LogicManager.vue')['default']
     TagSelector: typeof import('./src/components/common/TagSelector.vue')['default']
     WishResultOverlay: typeof import('./src/components/WishResultOverlay.vue')['default']

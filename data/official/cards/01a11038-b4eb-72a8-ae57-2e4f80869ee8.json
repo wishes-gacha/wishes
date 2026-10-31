@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4eb-72a8-ae57-2e4f80869ee8",
+  "origin": "official",
+  "content": {
+    "zh-CN": "晚安与睡颜"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "nihility"
+    }
+  ]
+}

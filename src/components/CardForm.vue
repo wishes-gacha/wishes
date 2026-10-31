@@ -1,22 +1,30 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Tag } from '../types';
+import { LocalizedString, Tag } from '../types';
+import LocalizedInput from './common/LocalizedInput.vue';
 
 const props = defineProps<{
-  initialContent?: string;
-  initialTags?: Tag[];
-  existingTags?: Tag[]; // 所有已使用的标签（用于可选列表）
+  initialContent?: LocalizedString,
+  initialTitle?: LocalizedString,
+  initialTags?: Tag[],
+  existingTags?: Tag[], // 所有已使用的标签（用于可选列表）
 }>();
 
 const emit = defineEmits<{
-  (e: 'change', data: { content: string; tags: Tag[] }): void;
+  (e: 'change', data: {
+    content: LocalizedString,
+    title: LocalizedString,
+    tags: Tag[],
+    valid: boolean
+  }): void;
 }>();
 
 const { t } = useI18n();
 
 // 表单数据
-const localContent = ref(props.initialContent || '');
+const localContent = ref<LocalizedString>({ ...(props.initialContent ?? {}) });
+const localTitle = ref<LocalizedString>({ ...(props.initialTitle ?? {}) });
 const localTags = ref<Tag[]>([...(props.initialTags || [])]);
 
 // 新建标签输入
@@ -80,20 +88,35 @@ function addAvailableTag(tag: Tag) {
 }
 
 // 监听变化通知父组件
-watch([localContent, localTags], () => {
+watch([localContent, localTitle, localTags], () => {
   emit('change', {
-    content: localContent.value,
+    content: { ...localContent.value },
+    title: Object.keys(localTitle.value).length ? { ...localTitle.value } : {},
     tags: localTags.value,
+    valid: Object.values(localContent.value).some(v => v.trim().length > 0),
   });
-}, { deep: true });
+}, { deep: true, immediate: true });
+
+const nameValid = computed(() => 
+  Object.values(localContent.value).some(v => v.trim().length > 0)
+)
 </script>
 
 <template>
   <div class="card-form">
-    <!-- 名称（单行） -->
+    <!-- 各语言名称 -->
     <div class="form-group">
-      <label>{{ t('card.name') }}</label>
-      <input v-model="localContent" :placeholder="t('card.namePlaceholder')" class="form-input" />
+      <label>
+        {{ t('card.name') }}
+        <span v-if="!nameValid" class="required-hint">{{ t('card.nameRequired') }}</span>
+      </label>
+      <LocalizedInput v-model="localContent" :placeholder="t('card.namePlaceholder')" />
+    </div>
+
+    <!-- 各语言称号 (可选) -->
+    <div class="form-group">
+      <label>{{ t('card.title') }}</label>
+      <LocalizedInput v-model="localTitle" :placeholder="t('card.titlePlaceholder')" />
     </div>
 
     <!-- 已选标签 -->
@@ -169,7 +192,33 @@ watch([localContent, localTags], () => {
   color: #b0c0d0;
 }
 
+.required-hint {
+  margin-left: 5px;
+  font-size: 1.2rem;
+  color: #e74c3c;
+}
+
+/* 多语言输入行 */
+.locale-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.locale-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.locale-label {
+  flex: 0 0 68px;
+  font-size: 1.1rem;
+  color: #6a7a90;
+  text-align: right;
+  user-select: none;
+}
+
 .form-input {
+  flex: 1;
   background: #0b0e14;
   border: none;
   border-bottom: 3px solid #2a3340;

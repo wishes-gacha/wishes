@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b558-73f3-9405-ddbe1ae0a936",
+  "origin": "official",
+  "content": {
+    "zh-CN": "风堇"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "fate",
+      "value": "remembrance"
+    }
+  ]
+}

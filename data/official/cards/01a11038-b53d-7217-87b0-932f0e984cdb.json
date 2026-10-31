@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b53d-7217-87b0-932f0e984cdb",
+  "origin": "official",
+  "content": {
+    "zh-CN": "克拉拉"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "physical"
+    },
+    {
+      "namespace": "fate",
+      "value": "destruction"
+    }
+  ]
+}

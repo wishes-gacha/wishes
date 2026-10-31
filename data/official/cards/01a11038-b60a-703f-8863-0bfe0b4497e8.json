@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b60a-703f-8863-0bfe0b4497e8",
+  "origin": "official",
+  "content": {
+    "zh-CN": "提纳里"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "dendro"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

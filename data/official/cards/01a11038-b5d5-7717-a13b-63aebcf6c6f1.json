@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5d5-7717-a13b-63aebcf6c6f1",
+  "origin": "official",
+  "content": {
+    "zh-CN": "烟绯"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "pyro"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

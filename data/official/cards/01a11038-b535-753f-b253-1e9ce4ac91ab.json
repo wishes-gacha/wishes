@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b535-753f-b253-1e9ce4ac91ab",
+  "origin": "official",
+  "content": {
+    "zh-CN": "驭空"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "imaginary"
+    },
+    {
+      "namespace": "fate",
+      "value": "harmony"
+    }
+  ]
+}

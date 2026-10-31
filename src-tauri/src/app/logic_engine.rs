@@ -6,7 +6,7 @@
 use std::sync::Arc;
 use rand::rngs::ChaCha12Rng;
 use serde_json::Value as JsonValue;
-use crate::{domain::{ids::LogicId, logic::{definition::{LogicVariant, RuleType}, error::LogicError, result::LogicResult}}, infrastructure::registry::LogicRegistry};
+use crate::{domain::{ids::GlobalId, logic::{definition::{LogicVariant, RuleType}, error::LogicError, result::LogicResult}}, infrastructure::registry::LogicRegistry};
 
 /// 无状态的逻辑执行引擎.
 /// 
@@ -21,10 +21,10 @@ impl LogicEngine {
         Self { registry }
     }
 
-    /// 执行给定逻辑 Id 对应的逻辑, 修改实例状态并返回逻辑结果.
+    /// 执行给定逻辑 `global_id` 对应的逻辑, 修改实例状态并返回逻辑结果.
     /// 
     /// # 参数
-    /// - `logic_id`: 要执行的逻辑定义 Id.
+    /// - `logic_id`: 要执行的逻辑定义 `global_id`.
     /// - `state`: 卡池逻辑的状态.
     /// - `rng`: 随机数生成器, 用于执行过程中的随机来源.
     /// 
@@ -36,11 +36,11 @@ impl LogicEngine {
     /// - 执行器 (硬编码执行器) 未注册.
     /// - 当前无法使用自定义规则.
     pub fn execute(&self,
-        logic_id: LogicId,
+        logic_id: GlobalId,
         state: &mut JsonValue,
         rng: &mut ChaCha12Rng
     ) -> Result<LogicResult, LogicError> {
-        let tagged_def = self.registry.get_definition(logic_id)
+        let tagged_def = self.registry.get_definition_including_shadowed(logic_id)
             .ok_or(LogicError::DefinitionNotFound(logic_id))?;
 
         match &tagged_def.variant {

@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4e4-737a-acf3-eb2005db2207",
+  "origin": "official",
+  "content": {
+    "zh-CN": "在蓝天下"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "destruction"
+    }
+  ]
+}

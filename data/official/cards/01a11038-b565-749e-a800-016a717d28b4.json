@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b565-749e-a800-016a717d28b4",
+  "origin": "official",
+  "content": {
+    "zh-CN": "翡玉法球"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

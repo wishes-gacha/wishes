@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4f7-7295-9bdc-842cc0fb283b",
+  "origin": "official",
+  "content": {
+    "zh-CN": "秘密誓心"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "destruction"
+    }
+  ]
+}

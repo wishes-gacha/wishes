@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5cc-75c9-a460-cc7fd344b38e",
+  "origin": "official",
+  "content": {
+    "zh-CN": "托马"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "pyro"
+    },
+    {
+      "namespace": "profession",
+      "value": "polearm"
+    }
+  ]
+}

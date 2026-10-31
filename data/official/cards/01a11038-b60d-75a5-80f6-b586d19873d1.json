@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b60d-75a5-80f6-b586d19873d1",
+  "origin": "official",
+  "content": {
+    "zh-CN": "琴"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    }
+  ]
+}

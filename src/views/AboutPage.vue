@@ -10,7 +10,7 @@ defineEmits<{
 const { t } = useI18n();
 
 const version = __APP_VERSION__;
-const github_url = 'https://github.com/G-GAZE/wishes';
+const github_url = 'https://github.com/wishes-gacha/wishes';
 </script>
 
 <template>

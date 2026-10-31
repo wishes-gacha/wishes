@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5ed-71a1-8d0a-81cba481eaa6",
+  "origin": "official",
+  "content": {
+    "zh-CN": "菲谢尔"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "electro"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

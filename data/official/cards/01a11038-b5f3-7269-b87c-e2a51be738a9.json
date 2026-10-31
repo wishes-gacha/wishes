@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5f3-7269-b87c-e2a51be738a9",
+  "origin": "official",
+  "content": {
+    "zh-CN": "诺艾尔"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "geo"
+    },
+    {
+      "namespace": "profession",
+      "value": "claymore"
+    }
+  ]
+}

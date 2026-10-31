@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b580-7205-bed2-0cb1f6689414",
+  "origin": "official",
+  "content": {
+    "zh-CN": "祭礼剑"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    }
+  ]
+}

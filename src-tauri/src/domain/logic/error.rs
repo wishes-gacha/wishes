@@ -1,6 +1,7 @@
 //! # 逻辑模块常见错误类型定义
 
-use crate::domain::ids::LogicId;
+use crate::domain::ids::GlobalId;
+
 
 
 /// 抽卡流程中发生的逻辑模块错误.
@@ -8,7 +9,7 @@ use crate::domain::ids::LogicId;
 pub enum LogicError {
     /// 逻辑定义未找到
     #[error("Logic definition not found: {0:?}")]
-    DefinitionNotFound(LogicId),
+    DefinitionNotFound(GlobalId),
     /// `Variant::Hardcoded` 类型逻辑定义所关联的硬编码执行器未找到.
     #[error("Logic executor not found: {0}")]
     ExecutorNotFound(String),

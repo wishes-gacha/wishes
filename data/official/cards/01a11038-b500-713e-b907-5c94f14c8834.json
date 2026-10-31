@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b500-713e-b907-5c94f14c8834",
+  "origin": "official",
+  "content": {
+    "zh-CN": "鼹鼠党欢迎你"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "destruction"
+    }
+  ]
+}

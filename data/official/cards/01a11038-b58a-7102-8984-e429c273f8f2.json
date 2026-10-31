@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b58a-7102-8984-e429c273f8f2",
+  "origin": "official",
+  "content": {
+    "zh-CN": "绝弦"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5a2-7571-bbab-1479c1bf5206",
+  "origin": "official",
+  "content": {
+    "zh-CN": "九条裟罗"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "electro"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

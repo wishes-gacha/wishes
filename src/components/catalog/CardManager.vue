@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, h } from 'vue';
 import { useCardManager } from '../../composables/useCardManager';
 import { CardCreateRequest, CardSummary, CardUpdateRequest, getCardReferencingDecks } from '../../api/card';
 import type { DeckReference } from '../../api/card';
-import { Tag } from '../../types';
+import { LocalizedString, Tag } from '../../types';
 import CardForm from '../CardForm.vue';
 import { useTagStyles } from '../../composables/useTagStyles.ts';
-import { useMessage } from 'naive-ui';
+import { useMessage, useDialog } from 'naive-ui';
 import { useI18n } from 'vue-i18n';
+import { originLabel, shortGlobalId, useLocaleText } from '../../composables/useLocaleText.ts';
 
 const {
   cards,
@@ -16,14 +17,18 @@ const {
   searchQuery,
   filteredCards,
   allUsedTags,
+  displayContent,
   loadCards,
   create,
   update,
-  remove
+  remove,
+  toggleShadow,
 } = useCardManager();
 
 const message = useMessage();
+const dialog = useDialog();
 const { t } = useI18n();
+const { pickLocalized } = useLocaleText();
 
 // 选中卡片
 const selectedCard = ref<CardSummary | null>(null);
@@ -33,15 +38,16 @@ const showModal = ref(false);
 const isEditMode = ref(false);
 const editingCard = ref<CardSummary | null>(null);
 const formData = ref<CardCreateRequest>({
-  content: "",
+  content: {},
+  title: {},
   tags: []
 })
 
-// 删除确认
-const showDeleteConfirm = ref(false);
-const deletingCard = ref<CardSummary | null>(null);
-// 删除前查询到的引用卡组
-const referencingDecks = ref<DeckReference[]>([]);
+const shadowSource = ref(true);
+
+const formValid = ref(false);
+
+const deleting = ref(false);
 
 // 标签筛选浮窗
 const showTagFilterPopup = ref(false);
@@ -107,81 +113,173 @@ function clearSelected() {
 function openCreateModal() {
   isEditMode.value = false;
   editingCard.value = null;
-  formData.value = { content: "", tags: [] };
+  formData.value = { content: {}, title: {}, tags: [] };
+  formValid.value = false;
   showModal.value = true;
+  shadowSource.value = true;
 }
 
-
 function openEditModal(card: CardSummary) {
+  // 只读来源且有派生 → 引导编辑派生
+  if (card.derived_id) {
+    dialog.warning({
+      title: t('card.derivedExistsTitle'),
+      content: t('card.derivedExistsContent', { name: displayContent(card) }),
+      positiveText: t('card.editDerivedAction'),
+      negativeText: t('common.cancel'),
+      onPositiveClick: () => {
+        const derived = cards.value.find(c => c.global_id === card.derived_id);
+        if (derived) {
+          selectCard(derived);
+          doOpenEditModal(derived);
+        } else {
+          message.warning(t('card.derivedNotFound'));
+        }
+      },
+    });
+    return;
+  }
+  doOpenEditModal(card);
+}
+
+function doOpenEditModal(card: CardSummary) {
   isEditMode.value = true;
   editingCard.value = card;
   formData.value = {
-    content: card.content,
+    content: { ...card.content },
+    title: { ...(card.title ?? {}) },
     tags: [...card.tags],
-  }
+  };
+  formValid.value = Object.values(card.content).some(v => v.trim().length > 0);
   showModal.value = true;
+  shadowSource.value = true;
 }
 
 function closeModal() {
   showModal.value = false;
 }
 
-function onFormChanged(data: { content: string, tags: Tag[] }) {
-  formData.value = data;
+function onFormChanged(data: { content: LocalizedString, title: LocalizedString, tags: Tag[], valid: boolean }) {
+  formData.value = {
+    content: data.content,
+    title: data.title,
+    tags: data.tags,
+  };
+  formValid.value = data.valid;
 }
 
 async function handleSave() {
-  if (isEditMode.value && editingCard.value) {
-    const req: CardUpdateRequest = {
-      id: editingCard.value.id,
-      new_content: formData.value.content,
-      new_tags: formData.value.tags,
-    }
-    const result = await update(req);
-    if (result) {
-      closeModal();
-      if (selectedCard.value?.id === result.id) {
-        selectCard(result)
+  try {
+    if (isEditMode.value && editingCard.value) {
+      const req: CardUpdateRequest = {
+        global_id: editingCard.value.global_id,
+        content: formData.value.content,
+        title: formData.value.title,
+        tags: formData.value.tags,
+        shadow: shadowSource.value,
       }
-    }
-  } else {
-    const result = await create(formData.value);
-    if (result) {
+      const result = await update(req);
+      closeModal();
+      const refreshed = cards.value.find(c => c.global_id === result?.global_id);
+      selectCard(refreshed ?? result);
+    } else {
+      const result = await create(formData.value);
       closeModal();
       selectCard(result);
     }
+  } catch (e) {
+    message.error(t(isEditMode.value ? "card.updateFailed" : "card.createFailed", { error: e }));
   }
+}
+
+async function toggleShadowAction(card: CardSummary) {
+    try {
+        const updated = await toggleShadow(card.global_id, !card.shadowed);
+        message.success(t(updated.shadowed ? 'card.shadowEnabled' : 'card.shadowDisabled'));
+        const refreshed = cards.value.find(c => c.global_id === updated.global_id);
+        if (refreshed) selectCard(refreshed);
+    } catch (e) {
+        message.error(String(e));
+    }
 }
 
 async function confirmDelete(card: CardSummary) {
-  deletingCard.value = card;
+  if (deleting.value) return;
+  deleting.value = true;
+  let refDecks: DeckReference[] = [];
   try {
-    referencingDecks.value = await getCardReferencingDecks(card.id);
+    refDecks = await getCardReferencingDecks(card.global_id);
   } catch (e) {
-    referencingDecks.value = [];
+    message.warning(t('card.refDecksLoadFailed', { error: e }));
   }
-  showDeleteConfirm.value = true;
+
+  const isFork = !!card.forked_from;
+  const sourceName = card.forked_from_name
+    ? pickLocalized(card.forked_from_name)
+    : shortGlobalId(card.forked_from);
+  
+  const content = h('div', { class: 'wishes-delete-dialog' }, [
+    h('p', { class: 'confirm-message' },
+      t('card.deleteConfirmContent', { name: displayContent(card) })
+    ),
+
+    isFork && h('div', { class: 'fork-visibility-hint' }, [
+      h('p', {}, t('card.deleteForkRestore', { name: sourceName })),
+    ]),
+
+    refDecks.length > 0 && h('div', { class: 'confirm-refs' }, [
+      h('p', { class: 'ref-hint' },
+        isFork
+          ? t('card.deleteRefDeckForkInfo')
+          : t('card.deleteRefDeckWarning')
+      ),
+      h('ul', { class: 'ref-list' },
+        refDecks.map(d => h('li', { key: d.global_id }, pickLocalized(d.name)))
+      ),
+    ]),
+
+    h('p', { class: 'warning' }, t('card.deleteWarning')),
+  ]);
+
+  dialog.warning({
+    title: t('card.deleteConfirmTitle'),
+    content: () => content,
+    positiveText: t('card.deleteConfirmTitle'),
+    negativeText: t('common.cancel'),
+    positiveButtonProps: { color: '#e74c3c', textColor: '#fff' },
+    onPositiveClick: async () => {
+      try {
+        await remove(card.global_id);
+        if (selectedCard.value?.global_id === card.global_id) clearSelected();
+        message.success(t('card.deleteSuccess'));
+      } catch (e) {
+        message.error(t("card.deleteFailed", { error: e }));
+        return false;
+      }
+    }
+  })
+
+  deleting.value = false;
 }
 
-function closeDeleteConfirm() {
-  showDeleteConfirm.value = false;
-  deletingCard.value = null;
-  referencingDecks.value = [];
-}
+// function closeDeleteConfirm() {
+//   showDeleteConfirm.value = false;
+//   deletingCard.value = null;
+//   referencingDecks.value = [];
+// }
 
-async function handleDelete() {
-  if (deletingCard.value) {
-    const success = await remove(deletingCard.value.id);
-    if (!success) {
-      message.error(error.value ?? t('card.deleteFailed'));
-      return;
-    }
-    if (selectedCard.value?.id === deletingCard.value.id) {
-      clearSelected();
-    }
-    closeDeleteConfirm();
-  }
-}
+// async function handleDelete() {
+//   if (!deletingCard.value) return;
+//   const id = deletingCard.value.global_id;
+//   try {
+//     await remove(id);
+//     if (selectedCard.value?.global_id === id) clearSelected();
+//     closeDeleteConfirm();
+//     message.success(t('card.deleteSuccess'))
+//   } catch (e) {
+//     message.error(t("card.deleteFailed", { error: e }));
+//   }
+// }
 
 // 标签筛选相关
 function toggleTagFilter(tag: Tag) {
@@ -263,15 +361,6 @@ const selectedCardTagClasses = computed(() => {
                 </span>
               </div>
             </div>
-            <!-- <span
-              v-for="tag in allUsedTags"
-              :key="`${tag.namespace}:${tag.value}`"
-              class="filter-tag"
-              :class="{ active: selectedFilterTags.some(t => t.namespace === tag.namespace && t.value === tag.value) }"
-              @click="toggleTagFilter(tag)"
-            >
-              {{ tag.namespace }}: {{ tag.value }}
-            </span> -->
           </div>
           <div class="filter-popup-footer">
             <button class="filter-close" @click="closeTagFilterPopup">{{ t('card.confirm') }}</button>
@@ -287,23 +376,23 @@ const selectedCardTagClasses = computed(() => {
       <!-- 左侧: 卡片列表 -->
       <div class="card-list">
         <div v-if="loading" class="loading-state">{{ t('common.loading') }}</div>
-        <div v-else-if="error" class="error-state">{{ error }}</div>
+        <div v-else-if="error && cards.length === 0" class="error-state">{{ error }}</div>
         <div v-else-if="finalFilteredCards.length === 0" class="empty-state">
           <p>{{ t('card.noMatch') }}</p>
         </div>
         <div v-else class="card-grid">
           <div
             v-for="card in finalFilteredCards"
-            :key="card.id"
+            :key="card.global_id"
             class="card-item"
-            :class="{ active: selectedCard?.id === card.id }"
+            :class="{ active: selectedCard?.global_id === card.global_id }"
             @click="selectCard(card)"
           >
             <div class="card-preview">
               <div class="card-thumbnail">
                 <div class="card-thumbnail-placeholder"></div>
               </div>
-              <div class="card-content-preview">{{ card.content }}</div>
+              <div class="card-content-preview">{{ displayContent(card) }}</div>
               <div class="card-tags-preview">
                 <span
                   v-for="tag in card.tags.slice(0, 3)"
@@ -330,8 +419,26 @@ const selectedCardTagClasses = computed(() => {
             <div class="detail-image-placeholder"></div>
           </div>
           <div class="detail-id-name">
-            <div class="detail-id">ID {{ selectedCard.id }}</div>
-            <div class="detail-name">{{ selectedCard.content }}</div>
+            <div class="detail-name">{{ displayContent(selectedCard) }}</div>
+          </div>
+          <div class="detail-origin">
+            <span class="origin-badge" :class="`origin-${selectedCard.origin}`">
+              {{ originLabel(t, selectedCard.origin) }}
+            </span>
+            <span v-if="selectedCard.forked_from" class="fork-hint">
+              {{ t('card.forkedFrom', { name: pickLocalized(selectedCard.forked_from_name) || shortGlobalId(selectedCard.forked_from) }) }}
+            </span>
+            <span v-if="selectedCard.origin !== 'local'" class="fork-edit-hint">
+              {{ t('card.forkEditHint') }}
+            </span>
+          </div>
+          <div v-if="selectedCard.forked_from" class="shadow-status">
+            <span class="shadow-badge" :class="selectedCard.shadowed ? 'shadow-on' : 'shadow-off'">
+              {{ selectedCard.shadowed ? t('card.shadowedYes') : t('card.shadowedNo') }}
+            </span>
+            <button class="btn-toggle-shadow" @click="toggleShadowAction(selectedCard)">
+              {{ selectedCard.shadowed ? t('card.unshadowAction') : t('card.shadowAction') }}
+            </button>
           </div>
           <div class="detail-tags">
             <span
@@ -344,8 +451,18 @@ const selectedCardTagClasses = computed(() => {
             </span>
           </div>
           <div class="detail-actions">
-            <button class="btn-detail-edit" @click="openEditModal(selectedCard)">{{ t('card.edit') }}</button>
-            <button class="btn-detail-delete" @click="confirmDelete(selectedCard)">{{ t('card.delete') }}</button>
+            <button
+              v-if="selectedCard.derived_id"
+              class="btn-detail-edit"
+              @click="openEditModal(selectedCard)"
+            >{{ t('card.editDerivedAction') }}</button>
+            <button
+              v-else
+              class="btn-detail-edit"
+              @click="openEditModal(selectedCard)"
+            >{{ t('card.edit') }}</button>
+            <!-- <button class="btn-detail-edit" @click="openEditModal(selectedCard)">{{ t('card.edit') }}</button> -->
+            <button v-if="selectedCard.origin === 'local'" class="btn-detail-delete" @click="confirmDelete(selectedCard)">{{ t('card.delete') }}</button>
           </div>
         </div>
       </div>
@@ -361,35 +478,24 @@ const selectedCardTagClasses = computed(() => {
         <div class="modal-body">
           <CardForm
             :initial-content="editingCard?.content"
+            :initial-title="editingCard?.title"
             :initial-tags="editingCard?.tags"
             :existing-tags="allUsedTags"
             @change="onFormChanged"
           />
         </div>
         <div class="modal-footer">
+          <label v-if="isEditMode && editingCard?.origin !== 'local'" class="shadow-option">
+            <input type="checkbox" v-model="shadowSource" />
+            <div class="shadow-option-text">
+              <span>{{ t('card.shadowSourceLabel') }}</span>
+              <span class="shadow-option-hint">{{ t('card.shadowSourceHint') }}</span>
+            </div>
+          </label>
           <button class="btn-cancel" @click="closeModal">{{ t('common.cancel') }}</button>
-          <button class="btn-save" @click="handleSave">
+          <button class="btn-save" @click="handleSave" :disabled="!formValid">
             {{ isEditMode ? t('card.save') : t('card.createAction') }}
           </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 删除确认弹窗 -->
-    <div v-if="showDeleteConfirm" class="modal-overlay" @click="closeDeleteConfirm">
-      <div class="modal-content confirm-dialog" @click.stop>
-        <h3 class="confirm-title">{{ t('card.deleteConfirmTitle') }}</h3>
-        <p class="confirm-message">{{ t('card.deleteConfirmContent', { name: deletingCard?.content }) }}</p>
-        <div v-if="referencingDecks.length > 0" class="confirm-refs">
-          <p class="ref-hint">{{ t('card.deleteRefDeckWarning') }}</p>
-          <ul class="ref-list">
-            <li v-for="deck in referencingDecks" :key="deck.id">{{ deck.name }}</li>
-          </ul>
-        </div>
-        <p class="warning">{{ t('card.deleteWarning') }}</p>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="closeDeleteConfirm">{{ t('common.cancel') }}</button>
-          <button class="btn-danger" @click="handleDelete">{{ t('card.deleteConfirmTitle') }}</button>
         </div>
       </div>
     </div>
@@ -755,16 +861,6 @@ const selectedCardTagClasses = computed(() => {
   display: flex;
   align-items: baseline;
 }
-.detail-id {
-  flex-shrink: 0;
-  margin-right: 12px;
-  background: #4b7ac1;
-  color: #fff;
-  font-size: 1.2rem;
-  letter-spacing: 0.3px;
-  padding: 3px 10px;
-  border-radius: 100px;
-}
 .detail-name {
   flex: 1;
   text-align: center;
@@ -788,6 +884,73 @@ const selectedCardTagClasses = computed(() => {
   border-radius: 16px;
   font-size: 1rem;
 }
+
+/* 来源与分叉信息 */
+.detail-origin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+}
+.origin-badge {
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #8a99b4;
+  font-size: 1.3rem;
+}
+.origin-official {
+  background: rgba(79, 110, 247, 0.2);
+  color: #9db2ff;
+}
+.origin-local {
+  background: rgba(80, 200, 120, 0.18);
+  color: #7fd8a0;
+}
+.fork-hint {
+  color: #6a7a90;
+}
+.fork-edit-hint {
+  color: #d0a24c;
+}
+
+.shadow-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.shadow-badge {
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+}
+.shadow-on {
+  background: rgba(79, 110, 247, 0.2);
+  color: #9db2ff;
+}
+.shadow-off {
+  background: rgba(255, 255, 255, 0.08);
+  color: #8a99b4;
+}
+.btn-toggle-shadow {
+  background: #3b4b5e;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 14px;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn-toggle-shadow:hover {
+  background: #4f6ef7;
+}
+
 .detail-actions {
   display: flex;
   flex-direction: row;
@@ -795,28 +958,34 @@ const selectedCardTagClasses = computed(() => {
   margin-top: auto;
   justify-content: flex-end;
 }
+
 .btn-detail-edit,
 .btn-detail-delete {
-  padding: 8px 20px;
   border: none;
-  border-radius: 8px;
-  font-size: 1.2rem;
+  border-radius: 4px;
+  padding: 4px 14px;
+  font-size: 1.4rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.1s, transform 0.1s;
+  white-space: nowrap;
+  font-weight: bold;
 }
 .btn-detail-edit {
-  background: #007bff;
+  background: #3b4b5e;
   color: #fff;
 }
 .btn-detail-edit:hover {
-  background: #3d9bff;
+  background: #4f6ef7;
 }
+
 .btn-detail-delete {
-  background: #e74c3c;
-  color: #fff;
+  background: #212830;
+  border: 1px solid #3d444d;
+  color: #fa5e55;
 }
 .btn-detail-delete:hover {
-  background: #ff6b6b;
+  background: #b62324;
+  color: #ffe9ca;
 }
 
 /* --- 弹窗样式 --- */
@@ -880,12 +1049,47 @@ const selectedCardTagClasses = computed(() => {
   background: #2a3340;
   border-radius: 4px;
 }
+/* .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  flex-shrink: 0;
+} */
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 20px;
   flex-shrink: 0;
+  align-items: center;   /* 让 checkbox 和按钮垂直居中 */
+}
+.shadow-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;   /* 推到左侧 */
+  cursor: pointer;
+  user-select: none;
+}
+.shadow-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #007bff;
+}
+.shadow-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.shadow-option-text span:first-child {
+  font-size: 1.2rem;
+  color: #b0c0d0;
+}
+.shadow-option-hint {
+  font-size: 1rem;
+  color: #6a7a90;
 }
 .btn-cancel {
   background: transparent;
@@ -970,5 +1174,45 @@ const selectedCardTagClasses = computed(() => {
   padding: 50px 0;
   color: #6a7a90;
   font-size: 1.3rem;
+}
+</style>
+
+
+<style>
+/* 删除确认弹窗样式：dialog 内容传送到 body，scoped 不生效，用独立前缀隔离 */
+.wishes-delete-dialog .confirm-message {
+  margin: 8px 0;
+  font-size: 1.3rem;
+}
+.wishes-delete-dialog .fork-visibility-hint {
+  color: #d0a24c;
+  font-size: 1.2rem;
+  margin: 8px 0;
+}
+.wishes-delete-dialog .confirm-refs {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border: 1px solid #2a3340;
+  border-radius: 6px;
+  background: rgba(230, 44, 23, 0.178);
+}
+.wishes-delete-dialog .ref-hint {
+  color: #e0a96d;
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+.wishes-delete-dialog .ref-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #e4e8ef;
+  font-size: 1.2rem;
+  max-height: 12rem;
+  overflow-y: auto;
+}
+.wishes-delete-dialog .ref-list li { margin: 2px 0; }
+.wishes-delete-dialog .warning {
+  color: #e74c3c;
+  font-size: 1.3rem;
+  margin-top: 12px;
 }
 </style>

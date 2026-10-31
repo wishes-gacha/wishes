@@ -1,11 +1,12 @@
 import { ref } from 'vue';
 import { listCards } from '../api/card';
 import { CreateDeckRequest, DeckSummary } from '../api/decks';
-import { EventTag, Tag } from '../types';
+import { EventTag, LocalizedString, Tag } from '../types';
+import { DEFAULT_DATA_LOCALE } from './useLocaleText';
 
 export function useDeckEditor() {
   const formData = ref<CreateDeckRequest>({
-    name: '',
+    name: {},
     members: { conditions: [] },
     event_groups: {},
     tags: [],
@@ -45,23 +46,18 @@ export function useDeckEditor() {
     delete formData.value.event_groups[tag];
   }
 
-  // 重置表单
+  /** 重置表单, 传入卡组时以其多语言名称作为初始值 */
   function resetForm(initial?: DeckSummary) {
-    if (initial) {
-      formData.value = {
-        name: initial.name,
-        members: { conditions: [] }, // 需从后端获取完整数据，暂简化
-        event_groups: {},
-        tags: [...initial.tags],
-      };
-    } else {
-      formData.value = {
-        name: '',
-        members: { conditions: [] },
-        event_groups: {},
-        tags: [],
-      };
-    }
+    const name: LocalizedString = initial
+      ? { ...initial.name }
+      : { [DEFAULT_DATA_LOCALE]: '' };
+    
+    formData.value = {
+      name,
+      members: { conditions: [] }, // 需从后端获取完整数据，暂简化
+      event_groups: {},
+      tags: initial ? [...initial.tags] : [],
+    };
   }
 
   return {

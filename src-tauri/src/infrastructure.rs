@@ -2,9 +2,7 @@
 //! 
 //! 提供核心数据存储、标签索引、分配和持久化组件.
 
-pub mod id_allocator;
 pub mod registry;
 pub mod tag_index;
-pub mod error;
 
 pub mod repository;

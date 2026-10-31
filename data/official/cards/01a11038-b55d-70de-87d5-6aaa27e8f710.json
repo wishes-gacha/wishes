@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b55d-70de-87d5-6aaa27e8f710",
+  "origin": "official",
+  "content": {
+    "zh-CN": "冷刃"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    }
+  ]
+}

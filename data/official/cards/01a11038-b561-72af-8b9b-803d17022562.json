@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b561-72af-8b9b-803d17022562",
+  "origin": "official",
+  "content": {
+    "zh-CN": "沐浴龙血的剑"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    }
+  ]
+}

@@ -6,6 +6,7 @@
 
 import type { BannerInfo } from '../types';
 import { useI18n } from 'vue-i18n';
+import { pickLocalized, useLocaleText } from '../composables/useLocaleText';
 
 defineProps<{
   bannerInfo: BannerInfo | null
@@ -17,15 +18,15 @@ defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { currentLocale } = useLocaleText();
 </script>
 
 
 <template>
   <div class="page gacha-page">
       <div class="gacha-card">
-        <div class="banner-id">ID {{ bannerInfo?.id }}</div>
         <div class="info-section">
-          <div class="banner-name">{{ bannerInfo?.name || t('gacha.noBannerSelected') }}</div>
+          <div class="banner-name">{{ bannerInfo ? pickLocalized(bannerInfo.name, currentLocale) : t('gacha.noBannerSelected') }}</div>
           <div class="banner-tags" v-if="bannerInfo">
             <span
               v-for="tag in bannerInfo.tags"
@@ -38,11 +39,11 @@ const { t } = useI18n();
           <div class="detail-list" v-if="bannerInfo">
             <div class="detail-item">
               <span class="label">{{ t('gacha.deckLabel') }}</span>
-              <span class="value">{{ bannerInfo.deck_name }}</span>
+              <span class="value">{{ pickLocalized(bannerInfo.deck_name, currentLocale) }}</span>
             </div>
             <div class="detail-item">
               <span class="label">{{ t('gacha.logicLabel') }}</span>
-              <span class="value">{{ bannerInfo.logic_name }}</span>
+              <span class="value">{{ pickLocalized(bannerInfo.logic_name, currentLocale) }}</span>
             </div>
             <div class="detail-item">
               <span class="label">{{ t('gacha.totalCounterLabel') }}</span>
@@ -106,24 +107,6 @@ const { t } = useI18n();
   position: relative;
   min-height: 250px;
   min-width: 450px;
-}
-
-.banner-id {
-  position: absolute;
-  top: 1.2rem;
-  left: -0.5rem;
-  background: #4b7ac1;
-  /* background: #dc1e47; */
-  /* background: #007bff; */
-  /* color: #e1eaf5; */
-  color: #fff;
-  font-size: 1.2rem;
-  letter-spacing: 0.3px;
-  padding: 3px 10px 3px 12px;
-  border-radius: 0 100px 100px 0;
-  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.2);
-  z-index: 3;
-  line-height: 1.4;
 }
 
 .info-section {

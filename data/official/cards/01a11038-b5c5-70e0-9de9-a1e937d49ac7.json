@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5c5-70e0-9de9-a1e937d49ac7",
+  "origin": "official",
+  "content": {
+    "zh-CN": "安柏"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "pyro"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "global_id": "01a0fbfa-c5ca-7cb2-992a-71ef114f7390",
+  "origin": "official",
+  "name": {
+    "zh-CN": "原神角色 UP 池逻辑"
+  },
+  "variant": {
+    "variant": "Hardcoded",
+    "config": {
+      "executor_name": "genshin_character_up"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b50f-7706-bc6a-24832dcefaef",
+  "origin": "official",
+  "content": {
+    "zh-CN": "卢卡"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "physical"
+    },
+    {
+      "namespace": "fate",
+      "value": "nihility"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5e2-7497-ac5b-ca8f51ae9097",
+  "origin": "official",
+  "content": {
+    "zh-CN": "米卡"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "profession",
+      "value": "polearm"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b513-70d2-88a1-e03b7fafcce4",
+  "origin": "official",
+  "content": {
+    "zh-CN": "娜塔莎"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "physical"
+    },
+    {
+      "namespace": "fate",
+      "value": "abundance"
+    }
+  ]
+}

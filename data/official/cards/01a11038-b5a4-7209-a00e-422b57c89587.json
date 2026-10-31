@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5a4-7209-a00e-422b57c89587",
+  "origin": "official",
+  "content": {
+    "zh-CN": "云堇"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "geo"
+    },
+    {
+      "namespace": "profession",
+      "value": "polearm"
+    }
+  ]
+}

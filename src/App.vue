@@ -10,6 +10,7 @@
 import { computed, defineAsyncComponent, nextTick, ref, watch } from "vue";
 import BottomNav from "./components/BottomNav.vue";
 import { useWish } from "./composables/useWish";
+import { pickLocalized } from "./composables/useLocaleText.ts";
 import type { WishResponse } from "./types.ts";
 import WishResultOverlay from "./components/WishResultOverlay.vue";
 import { GlobalThemeOverrides, NConfigProvider, darkTheme, NDialogProvider, NMessageProvider, createDiscreteApi } from "naive-ui";
@@ -25,7 +26,7 @@ const {
   doWishTen,
 } = useWish();
 
-const selectedBannerId = ref<number | null>(null);
+const selectedBannerId = ref<string | null>(null);
 
 // 初始化加载
 loadBanners();
@@ -33,20 +34,20 @@ loadBanners();
 // 默认选中第一个卡池, 并加载信息
 watch(banners, (new_banners) => {
   if (new_banners.length > 0 && selectedBannerId.value === null) {
-    selectedBannerId.value = new_banners[0].id;
+    selectedBannerId.value = new_banners[0].global_id;
     loadBannerInfo(selectedBannerId.value);
   }
   scrollToActiveBannerTab();
 });
 
-function onSelectBanner(bannerId: number) {
-  selectedBannerId.value = bannerId;
-  loadBannerInfo(bannerId);
+function onSelectBanner(bannerGlobalId: string) {
+  selectedBannerId.value = bannerGlobalId;
+  loadBannerInfo(bannerGlobalId);
   navigateTo("gacha");
 }
 
-async function onBannerChanged(id: number) {
-  selectedBannerId.value = id;
+async function onBannerChanged(bannerGlobalId: string) {
+  selectedBannerId.value = bannerGlobalId;
   await loadBannerInfo(selectedBannerId.value)
   scrollToActiveBannerTab();
 }
@@ -127,7 +128,6 @@ function navigateTo(page: string) {
   currentPage.value = page;
 }
 
-
 const themeOverrides: GlobalThemeOverrides = {
   common: {
     primaryColor: '#007bff',
@@ -183,12 +183,12 @@ const { message: discreteMessage } = createDiscreteApi(['message'], {
               <div v-if="isGachaPage" class="banner-tabs">
                 <div
                   v-for="b in banners"
-                  :key="b.id"
+                  :key="b.global_id"
                   class="banner-tab"
-                  :class="{ active: selectedBannerId === b.id }"
-                  @click="onBannerChanged(b.id)"
+                  :class="{ active: selectedBannerId === b.global_id }"
+                  @click="onBannerChanged(b.global_id)"
                 >
-                  {{ b.name }}
+                  {{ pickLocalized(b.name) }}
                 </div>
               </div>
             </div>

@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5ca-746c-aa1d-b3237105223c",
+  "origin": "official",
+  "content": {
+    "zh-CN": "布伦妮"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b585-775e-89b2-a8a7ad6f160a",
+  "origin": "official",
+  "content": {
+    "zh-CN": "祭礼残章"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

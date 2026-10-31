@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4f5-7680-8302-996718d909cb",
+  "origin": "official",
+  "content": {
+    "zh-CN": "猎物的视线"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "nihility"
+    }
+  ]
+}

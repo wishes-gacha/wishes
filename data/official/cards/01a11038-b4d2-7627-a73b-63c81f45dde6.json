@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4d2-7627-a73b-63c81f45dde6",
+  "origin": "official",
+  "content": {
+    "zh-CN": "「我」的诞生"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "erudition"
+    }
+  ]
+}

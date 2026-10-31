@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b57d-71ff-bcd9-ea70a8d69ee9",
+  "origin": "official",
+  "content": {
+    "zh-CN": "流浪乐章"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

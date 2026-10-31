@@ -12,11 +12,7 @@ use anyhow::{Context, Result};
 use tauri_plugin_opener::OpenerExt;
 use crate::{
     app::state::AppState, domain::{
-        ids::{
-            BannerId,
-            CardId,
-            DeckId
-        },
+        ids::GlobalId,
         tag::Tag
     }, interface::{
         banner_info::{
@@ -57,14 +53,13 @@ fn log_command_err(command: &'static str, e: anyhow::Error) -> String {
 /// 执行单次抽卡
 /// 
 /// # 参数
-/// - `banner_id`: 目标卡池的 Id (`u64`).
+/// - `banner_id`: 目标卡池的 `global_id` (Uuid 字符串).
 /// - `state`: 当前应用状态.
 /// 
 /// # 返回值
 /// 返回 `WishResponse` 包含抽到的卡片信息, 若失败则返回错误信息.
 #[tauri::command]
-fn wish(banner_id: u64, state: State<AppState>) -> Result<WishResponse, String> {
-    let banner_id = BannerId(banner_id);
+fn wish(banner_id: GlobalId, state: State<AppState>) -> Result<WishResponse, String> {
     state.wish(banner_id)
         .map(WishResponse::new)
         .map_err(|e| log_command_err("wish", e))
@@ -73,14 +68,13 @@ fn wish(banner_id: u64, state: State<AppState>) -> Result<WishResponse, String> 
 /// 执行十连抽卡 (后端批量, 保证顺序与状态一致性)
 /// 
 /// # 参数
-/// - `banner_id`: 目标卡池的 Id (`u64`).
+/// - `banner_id`: 目标卡池的 `global_id` (Uuid 字符串).
 /// - `state`: 当前应用状态.
 /// 
 /// # 返回值
 /// 按抽取顺序返回 10 个 `WishResponse`; 任一次抽取失败则整体返回错误.
 #[tauri::command]
-fn wish_ten(banner_id: u64, state: State<AppState>) -> Result<Vec<WishResponse>, String> {
-    let banner_id = BannerId(banner_id);
+fn wish_ten(banner_id: GlobalId, state: State<AppState>) -> Result<Vec<WishResponse>, String> {
     let mut results = Vec::with_capacity(10);
     for _ in 0..10 {
         let result = state.wish(banner_id)
@@ -101,12 +95,11 @@ fn get_banners(state: State<AppState>) -> Result<Vec<BannerSummary>, String> {
 /// 获取指定卡池的详细信息.
 /// 
 /// # 参数
-/// - `banner_id`: 卡池 Id (`u64`).
+/// - `banner_id`: 卡池 `global_id` (Uuid 字符串).
 /// 
 /// 返回 `BannerInfo` 包含卡池名称、标签、关联卡组/逻辑名称及总抽数.
 #[tauri::command]
-fn get_banner_info(banner_id: u64, state: State<AppState>) -> Result<BannerInfo, String> {
-    let banner_id = BannerId(banner_id);
+fn get_banner_info(banner_id: GlobalId, state: State<AppState>) -> Result<BannerInfo, String> {
     state.banner_service.get_banner_info(banner_id)
         .map_err(|e| log_command_err("get_banner_info", e))
 }
@@ -160,65 +153,74 @@ fn open_log_dir(handle: tauri::AppHandle) -> Result<(), String> {
 #[tauri::command]
 fn list_cards(state: State<AppState>) -> Result<Vec<CardSummary>, String> {
     let cards = state.card_manager.list_all();
-    Ok(cards.iter().map(|card| CardSummary::from(card.as_ref())).collect())
+    Ok(cards.iter().map(|card| CardSummary::from_with_registry(card, &state.card_registry)).collect())
 }
 
 /// 获取根据标签筛选后的卡片的信息.
+/// 目前前端实际未使用.
 #[tauri::command]
 fn list_cards_by_tags(tags: Vec<Tag>, state: State<AppState>) -> Result<Vec<CardSummary>, String> {
     let cards = state.card_manager.list_by_tags(&tags);
-    Ok(cards.iter().map(|card| CardSummary::from(card.as_ref())).collect())
+    Ok(cards.iter().map(|card| CardSummary::from_with_registry(card, &state.card_registry)).collect())
 }
 
 /// 创建新的卡片.
 #[tauri::command]
 fn create_card(req: CardCreateRequest, state: State<AppState>) -> Result<CardSummary, String> {
-    let card = state.card_manager.create_card(req.content, req.tags)
+    let card = state.card_manager.create_card(req.content, req.tags, req.title)
         .map_err(|e| log_command_err("create_card", e))?;
-    Ok(CardSummary::from(&card))
+    Ok(CardSummary::from_with_registry(&card, &state.card_registry))
 }
 
 /// 更新卡片信息.
 #[tauri::command]
 fn update_card(req: CardUpdateRequest, state: State<AppState>) -> Result<CardSummary, String> {
-    let id = CardId(req.id);
     let card = state.card_manager.update_card(
-        id, 
-        req.new_content,
-        req.new_tags
+        req.global_id, 
+        req.content,
+        req.tags,
+        req.title,
+        req.shadow,
     ).map_err(|e| log_command_err("update_card", e))?;
-    Ok(CardSummary::from(&card))
+    Ok(CardSummary::from_with_registry(&card, &state.card_registry))
 }
 
 /// 删除卡片.
 #[tauri::command]
-fn delete_card(id: u64, state: State<AppState>) -> Result<(), String> {
-    let id = CardId(id);
-    state.card_manager.delete_card(id).map_err(|e| log_command_err("delete_card", e))?;
+fn delete_card(global_id: GlobalId, state: State<AppState>) -> Result<(), String> {
+    state.card_manager.delete_card(global_id).map_err(|e| log_command_err("delete_card", e))?;
     Ok(())
+}
+
+/// 手动设置派生卡片是否遮蔽.
+#[tauri::command]
+fn set_card_shadow(global_id: GlobalId, shadowed: bool, state: State<AppState>) -> Result<CardSummary, String> {
+    let card = state.card_manager.set_shadow(global_id, shadowed)
+        .map_err(|e| log_command_err("set_card_shadow", e))?;
+    Ok(CardSummary::from_with_registry(&card, &state.card_registry))
 }
 
 /// 获取显式引用指定卡片的卡组列表.
 /// 
 /// 用于删除卡片前在前端提示可能受影响的卡组.
 #[tauri::command]
-fn get_card_referencing_decks(id: u64, state: State<AppState>) -> Result<Vec<DeckSummary>, String> {
-    let decks = state.card_manager.referencing_decks(CardId(id));
-    Ok(decks.iter().map(|deck| DeckSummary::from(deck.as_ref())).collect())
+fn get_card_referencing_decks(global_id: GlobalId, state: State<AppState>) -> Result<Vec<DeckSummary>, String> {
+    let decks = state.card_manager.referencing_decks(global_id);
+    Ok(decks.iter().map(|deck| DeckSummary::from_with_registry(deck.as_ref(), &state.deck_registry)).collect())
 }
 
 /// 获取所有卡组信息.
 #[tauri::command]
 fn list_decks(state: State<AppState>) -> Result<Vec<DeckSummary>, String> {
     let decks = state.deck_manager.list_all();
-    Ok(decks.iter().map(|d| DeckSummary::from(d.as_ref())).collect())
+    Ok(decks.iter().map(|d| DeckSummary::from_with_registry(d, &state.deck_registry)).collect())
 }
 
 /// 获取根据标签筛选后的卡片的信息.
 #[tauri::command]
 fn list_decks_by_tags(tags: Vec<Tag>, state: State<AppState>) -> Result<Vec<DeckSummary>, String> {
     let decks = state.deck_manager.list_by_tags(&tags);
-    Ok(decks.iter().map(|d| DeckSummary::from(d.as_ref())).collect())
+    Ok(decks.iter().map(|d| DeckSummary::from_with_registry(d, &state.deck_registry)).collect())
 }
 
 /// 创建新卡组.
@@ -226,29 +228,29 @@ fn list_decks_by_tags(tags: Vec<Tag>, state: State<AppState>) -> Result<Vec<Deck
 fn create_deck(req: CreateDeckRequest, state: State<AppState>) -> Result<DeckSummary, String> {
     let deck = state.deck_manager.create_deck(req.name, req.members, req.event_groups, req.tags)
         .map_err(|e| log_command_err("create_deck", e))?;
-    Ok(DeckSummary::from(&deck))
+    Ok(DeckSummary::from_with_registry(&deck, &state.deck_registry))
 }
 
-
 /// 更新卡组.
+/// 
+/// 若目标卡组来自只读来源 (官方 / 拓展包), 该操作会分叉出一个本地副本,
+/// 引用它的卡池不会被自动切换.
 #[tauri::command]
 fn update_deck(req: UpdateDeckRequest, state: State<AppState>) -> Result<DeckSummary, String> {
-    let id = DeckId(req.id);
     let deck = state.deck_manager.update_deck(
-        id,
+        req.global_id,
         req.name,
         req.members,
         req.event_groups,
         req.tags
     ).map_err(|e| log_command_err("update_deck", e))?;
-    Ok(DeckSummary::from(&deck))
+    Ok(DeckSummary::from_with_registry(&deck, &state.deck_registry))
 }
 
 /// 删除卡组.
 #[tauri::command]
-fn delete_deck(id: u64, state: State<AppState>) -> Result<(), String> {
-    let id = DeckId(id);
-    state.deck_manager.delete_deck(id).map_err(|e| log_command_err("delete_deck", e))?;
+fn delete_deck(global_id: GlobalId, state: State<AppState>) -> Result<(), String> {
+    state.deck_manager.delete_deck(global_id).map_err(|e| log_command_err("delete_deck", e))?;
     Ok(())
 }
 
@@ -266,7 +268,7 @@ pub fn run() {
 
             app.manage(LogGuardState(log_guard));
 
-            tracing::info!(log_dir = %log_dir.display(), "日志系统已初始化");
+            tracing::debug!(log_dir = %log_dir.display(), "日志系统已初始化");
 
             let data_dir = get_or_create_data_dir(handle)
                 .with_context(|| "获取数据目录失败")?;
@@ -298,6 +300,7 @@ pub fn run() {
             create_card,
             update_card,
             delete_card,
+            set_card_shadow,
             get_card_referencing_decks,
             list_decks,
             list_decks_by_tags,

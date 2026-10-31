@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5ab-7176-b0e6-35369c646faa",
+  "origin": "official",
+  "content": {
+    "zh-CN": "伊法"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

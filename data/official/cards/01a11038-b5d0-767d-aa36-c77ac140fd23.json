@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5d0-767d-aa36-c77ac140fd23",
+  "origin": "official",
+  "content": {
+    "zh-CN": "柯莱"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "dendro"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

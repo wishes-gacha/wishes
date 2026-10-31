@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5e4-7033-a23c-2d89c46781e3",
+  "origin": "official",
+  "content": {
+    "zh-CN": "绮良良"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "dendro"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    }
+  ]
+}

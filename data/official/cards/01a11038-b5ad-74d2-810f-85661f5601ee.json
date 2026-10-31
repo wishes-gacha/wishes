@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5ad-74d2-810f-85661f5601ee",
+  "origin": "official",
+  "content": {
+    "zh-CN": "凝光"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "geo"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

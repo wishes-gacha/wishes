@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4f0-70db-84e2-c69359bf73f1",
+  "origin": "official",
+  "content": {
+    "zh-CN": "此时恰好"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "abundance"
+    }
+  ]
+}

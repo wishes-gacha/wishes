@@ -13,7 +13,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: EditableCondition): void;
-  // (e: 'openCardSelector', field: 'include_ids' | 'exclude_ids', currentIds: number[]): void;
 }>();
 
 const condition = computed({
@@ -41,8 +40,8 @@ const isIdType = computed(() =>
   ['include_ids', 'exclude_ids'].includes(condition.value.type)
 );
 
-const currentIds = computed<number[]>(() => 
-  isIdType.value ? (condition.value as {ids: number[]}).ids ?? [] : []
+const currentIds = computed<string[]>(() => 
+  isIdType.value ? (condition.value as {ids: string[]}).ids ?? [] : []
 )
 
 const selectedType = computed({
@@ -56,7 +55,8 @@ function changeType(type: string) {
   if (['tag_all', 'tag_any', 'filter_tag_all', 'filter_tag_any'].includes(type)) {
     condition.value = { type, tags: [] } as EditableCondition;
   } else if (['include_ids', 'exclude_ids'].includes(type)) {
-    condition.value = { type, tags: [] } as EditableCondition;
+    // 卡片引用使用目标 Card 的 global_id
+    condition.value = { type, ids: [] } as EditableCondition;
   } else if (type === 'all') {
     condition.value = { type: 'all' } as EditableCondition;
   }
@@ -75,8 +75,8 @@ function openCardSelector() {
   showCardSelector.value = true;
 }
 
-function onCardConfirm(ids: number[]) {
-  condition.value = { ...condition.value, ids} as EditableCondition;
+function onCardConfirm(ids: string[]) {
+  condition.value = { ...condition.value, ids } as EditableCondition;
   showCardSelector.value = false;
 }
 </script>
@@ -90,18 +90,6 @@ function onCardConfirm(ids: number[]) {
       class="cond-type-select"
       :consistent-menu-width="false"
     />
-    
-    <!-- <select :value="condition.type" @change="changeType(($event.target as HTMLSelectElement).value)" class="cond-type-select">
-      <option value="all">全选</option>
-      <option value="tag_all">包含所有标签</option>
-      <option value="tag_any">包含任意标签</option>
-      <option value="filter_tag_all">保留所有标签</option>
-      <option value="filter_tag_any">保留任意标签</option>
-      <option value="include_ids">包含卡片</option>
-      <option value="exclude_ids">排除卡片</option>
-       以下类型暂未实现, 仅预留 -->
-      <!-- <option value="include_groups">include_groups</option> -->
-      <!-- <option value="exclude_groups">exclude_groups</option> -->
 
     <!-- 标签选择 -->
     <template v-if="isTagType">

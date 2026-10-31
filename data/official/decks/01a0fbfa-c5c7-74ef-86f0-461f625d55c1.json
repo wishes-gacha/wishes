@@ -1,0 +1,92 @@
+{
+  "global_id": "01a0fbfa-c5c7-74ef-86f0-461f625d55c1",
+  "origin": "official",
+  "name": {
+    "zh-CN": "原神胡桃 UP 卡组"
+  },
+  "members": {
+    "conditions": [
+      {
+        "type": "tag_all",
+        "tags": [
+          {
+            "namespace": "game",
+            "value": "genshin"
+          },
+          {
+            "namespace": "rarity",
+            "value": "3"
+          }
+        ]
+      },
+      {
+        "type": "tag_all",
+        "tags": [
+          {
+            "namespace": "game",
+            "value": "genshin"
+          },
+          {
+            "namespace": "rarity",
+            "value": "4"
+          }
+        ]
+      },
+      {
+        "type": "include_ids",
+        "ids": [
+          "01a11038-b616-7566-ac7d-cf01ed7f7fd2",
+          "01a11038-b605-7276-8c76-0c79874d7328",
+          "01a11038-b613-7681-b9ca-a7d67641b2c3",
+          "01a11038-b60d-75a5-80f6-b586d19873d1",
+          "01a11038-b60f-7610-891a-f8fc7e56486e",
+          "01a11038-b60b-7100-95fc-db595cd58f4e",
+          "01a11038-b611-7497-8f74-1637209f083d",
+          "01a11038-b60a-703f-8863-0bfe0b4497e8",
+          "01a11038-b607-72b1-8b15-7784515418af"
+        ]
+      }
+    ]
+  },
+  "event_groups": {
+    "up": {
+      "conditions": [
+        {
+          "type": "include_ids",
+          "ids": [
+            "01a11038-b5f9-7433-91d9-67f54b47e5e4",
+            "01a11038-b5ed-71a1-8d0a-81cba481eaa6",
+            "01a11038-b60f-7610-891a-f8fc7e56486e",
+            "01a11038-b5f1-736f-86bb-5c6562552735"
+          ]
+        }
+      ]
+    },
+    "standard": {
+      "conditions": [
+        {
+          "type": "all"
+        },
+        {
+          "type": "exclude_ids",
+          "ids": [
+            "01a11038-b5f1-736f-86bb-5c6562552735",
+            "01a11038-b5ed-71a1-8d0a-81cba481eaa6",
+            "01a11038-b60f-7610-891a-f8fc7e56486e",
+            "01a11038-b5f9-7433-91d9-67f54b47e5e4"
+          ]
+        }
+      ]
+    }
+  },
+  "tags": [
+    {
+      "namespace": "event",
+      "value": "up"
+    },
+    {
+      "namespace": "game",
+      "value": "genshin"
+    }
+  ]
+}

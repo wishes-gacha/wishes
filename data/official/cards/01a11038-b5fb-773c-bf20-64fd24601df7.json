@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5fb-773c-bf20-64fd24601df7",
+  "origin": "official",
+  "content": {
+    "zh-CN": "重云"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "profession",
+      "value": "claymore"
+    }
+  ]
+}

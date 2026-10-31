@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b544-7651-abb7-40c82192c59d",
+  "origin": "official",
+  "content": {
+    "zh-CN": "彦卿"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "fate",
+      "value": "the_hunt"
+    }
+  ]
+}

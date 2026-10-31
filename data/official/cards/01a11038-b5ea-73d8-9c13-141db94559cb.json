@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5ea-73d8-9c13-141db94559cb",
+  "origin": "official",
+  "content": {
+    "zh-CN": "莱依拉"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    }
+  ]
+}

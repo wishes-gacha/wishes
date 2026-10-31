@@ -5,12 +5,12 @@
 
 
 use std::{path::{Path, PathBuf}, sync::Arc};
-use anyhow::{Ok, Result};
+use anyhow::{Context, Ok, Result};
 use crate::{
     app::{
         admin::{card_manager::CardManager, deck_manager::DeckManager}, banner_service::BannerService, logic_engine::LogicEngine
     }, domain::{
-        ids::BannerId,
+        ids::GlobalId,
         wish_result::WishResult
     }, infrastructure::{
         registry::{
@@ -19,8 +19,11 @@ use crate::{
             DeckRegistry,
             LogicRegistry
         },
-        repository::state_repo::StateRepository
-    }, interface::catalog_stats::CatalogStats
+        repository::{
+            overlay_repo::{OverlayRepository, RefKind},
+            state_repo::StateRepository
+        }
+    }, interface::catalog_stats::CatalogStats, utils::data_paths::DataPaths
 };
 use super::loader::Loader;
 
@@ -30,15 +33,19 @@ use super::loader::Loader;
 pub struct AppState {
     /// 卡片注册器引用
     pub card_registry: Arc<CardRegistry>,
+
     /// 卡组注册器引用.
     pub deck_registry: Arc<DeckRegistry>,
+
     /// 逻辑注册器引用.
     pub logic_registry: Arc<LogicRegistry>,
+
     /// 卡池注册器引用.
     pub banner_registry: Arc<BannerRegistry>,
 
     /// 卡片管理器实例.
     pub card_manager: CardManager,
+
     /// 卡组管理器实例.
     pub deck_manager: DeckManager,
 
@@ -48,6 +55,9 @@ pub struct AppState {
     /// 卡池服务实例.
     pub banner_service: BannerService,
 
+    /// 当前使用的数据目录布局.
+    pub paths: DataPaths,
+
     /// 存储当前使用的数据目录路径.
     pub data_dir: PathBuf,
 }
@@ -56,53 +66,68 @@ impl AppState {
     /// 从指定数据目录加载所有配置和状态, 构建完整的 `AppState`.
     /// 
     /// # 流程
-    /// 1. 使用 `Loader` 加载卡片、卡组、逻辑定义和卡池到注册器。
-    /// 2. 将注册器包装为 `Arc`.
-    /// 3. 创建逻辑引擎和卡池服务.
-    /// 4. 打开状态数据库并加载所有卡池的持久化状态.
+    /// 1. 校验 `data/version.json`, 确认数据格式版本.
+    /// 2. 使用 `Loader` 按 official / local / packs 来源顺序加载全部数据到注册器.
+    /// 3. 将注册器包装为 `Arc` 引用.
+    /// 4. 创建逻辑引擎和卡池服务.
+    /// 5. 打开数据数据库并加载所有卡池作用域的持久化状态.
     /// 
     /// # 错误
     /// 任何加载或初始化步骤失败都将返回错误.
     pub fn load(data_dir: &Path, db_dir: &Path) -> Result<Self> {
         let loader = Loader::new();
+        let paths = DataPaths::new(data_dir);
 
-        let card_registry = loader.load_cards_from_dir(&data_dir.join("cards"))?;
-        tracing::info!(count = card_registry.count(), "已加载 Card", );
+        paths.ensure_layout()
+            .with_context(|| format!("创建闪数据子目录失败 - dir: {}", data_dir.display()))?;
 
-        let deck_registry = loader.load_decks_from_dir(
-            &data_dir.join("decks")
-        )?;
-        tracing::info!(count = deck_registry.count(), "已加载 Deck");
+        let (
+            card_registry,
+            deck_registry,
+            logic_registry,
+            banner_registry
+        ) = loader.load_all(&paths)?;
 
-        let mut logic_registry = LogicRegistry::new();
-        loader.load_logics_from_dir(
-            &data_dir.join("logics"),
-            &mut logic_registry
-        )?;
-        tracing::info!(count = logic_registry.count_definitions(), "已加载 Logic 定义");
+        tracing::info!(
+            card = card_registry.count(),           // 这些 count() 方法由 impl_fork_ops 宏提供
+            deck = deck_registry.count(),
+            logic = logic_registry.count(),
+            banner = banner_registry.count(),
+            "已完成数据的初始化加载"
+        );
 
-        let banner_registry = loader.load_banner_from_dir(
-            &data_dir.join("banners"),
-            &card_registry,
-            &deck_registry,
-            &logic_registry
-        )?;
-        tracing::info!(count = banner_registry.count(), "已加载 Banner");
-        
         // 转为 Arc 指针
         let card_registry = Arc::new(card_registry);
         let deck_registry = Arc::new(deck_registry);
         let logic_registry = Arc::new(logic_registry);
         let banner_registry = Arc::new(banner_registry);
 
+        // 打开引用覆盖层数据库, 并按分叉/遮蔽状态重建卡片引用覆盖表.
+        // 覆盖关系完全由数据文件中的 forked_from / shadowed 推导,
+        // 重建可以自动清理陈旧记录.
+        let overlay_repository = Arc::new(OverlayRepository::new(&db_dir.join("overrides.db"))?);
+        let card_overrides = card_registry.ref_overrides_snapshot();
+        overlay_repository
+            .replace_all(RefKind::Card, &card_overrides)
+            .with_context(|| "重建卡片引用覆盖表失败")?;
+        tracing::info!(
+            card_overrides = card_overrides.len(),
+            "引用覆盖层已就绪 (官方数据文件不被改写)"
+        );
+
         // 初始化管理器
-        let card_manager = CardManager::new(card_registry.clone(), deck_registry.clone(), data_dir.join("cards"));
+        let card_manager = CardManager::new(
+            card_registry.clone(),
+            deck_registry.clone(),
+            overlay_repository.clone(),
+            paths.clone()
+        );
         let deck_manager = DeckManager::new(
             deck_registry.clone(),
             card_registry.clone(),
             banner_registry.clone(),
             logic_registry.clone(),
-            data_dir.join("decks")
+            paths.clone()
         );
         
         // 初始化逻辑执行引擎
@@ -131,21 +156,22 @@ impl AppState {
             deck_manager,
             logic_engine,
             banner_service,
+            paths,
             data_dir: data_dir.to_path_buf(),
         })
     }
 
     /// 执行一次抽卡, 委托给 `banner_service`.
-    pub fn wish(&self, banner_id: BannerId) -> Result<WishResult> {
+    pub fn wish(&self, banner_id: GlobalId) -> Result<WishResult> {
         self.banner_service.wish(banner_id)
     }
 
     /// 获取图鉴统计信息.
     pub fn get_catalog_stats(&self) -> CatalogStats {
         CatalogStats {
-            cards: self.card_registry.count(),
-            decks: self.deck_registry.count(),
-            logics: self.logic_registry.count_definitions(),
+            cards: self.card_registry.count_visible(),
+            decks: self.deck_registry.count_visible(),
+            logics: self.logic_registry.count_visible_definitions(),
         }
     }
 }

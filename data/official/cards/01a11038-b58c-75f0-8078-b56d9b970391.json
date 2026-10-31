@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b58c-75f0-8078-b56d9b970391",
+  "origin": "official",
+  "content": {
+    "zh-CN": "西风剑"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    }
+  ]
+}

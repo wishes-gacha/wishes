@@ -1,0 +1,20 @@
+{
+  "global_id": "01a0fbfa-c5ce-7260-a9dd-9cb028972404",
+  "origin": "official",
+  "name": {
+    "zh-CN": "狂欢企划"
+  },
+  "deck_id": "01a0fbfa-c5c8-754f-888f-77e1c65bb5a0",
+  "logic_id": "01a0fbfa-c5cb-73e8-a665-d217e756e148",
+  "state_scope": "banner",
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "event",
+      "value": "up"
+    }
+  ]
+}

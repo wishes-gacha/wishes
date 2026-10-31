@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b515-776c-b8f7-a3832c589ce8",
+  "origin": "official",
+  "content": {
+    "zh-CN": "寒鸦"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "physical"
+    },
+    {
+      "namespace": "fate",
+      "value": "harmony"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5a6-7004-bd9b-9a8e69166544",
+  "origin": "official",
+  "content": {
+    "zh-CN": "五郎"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "geo"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

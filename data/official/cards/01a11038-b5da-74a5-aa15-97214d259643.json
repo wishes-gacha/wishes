@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5da-74a5-aa15-97214d259643",
+  "origin": "official",
+  "content": {
+    "zh-CN": "班尼特"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "pyro"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    }
+  ]
+}

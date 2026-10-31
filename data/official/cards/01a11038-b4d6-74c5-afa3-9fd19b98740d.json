@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4d6-74c5-afa3-9fd19b98740d",
+  "origin": "official",
+  "content": {
+    "zh-CN": "与行星相会"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "harmony"
+    }
+  ]
+}

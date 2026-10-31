@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b59b-71cf-b2e4-2d9565070044",
+  "origin": "official",
+  "content": {
+    "zh-CN": "雨裁"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "claymore"
+    }
+  ]
+}

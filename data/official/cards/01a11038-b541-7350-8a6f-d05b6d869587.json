@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b541-7350-8a6f-d05b6d869587",
+  "origin": "official",
+  "content": {
+    "zh-CN": "布洛尼娅"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "fate",
+      "value": "harmony"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b563-77cd-9772-a05cd5e89d49",
+  "origin": "official",
+  "content": {
+    "zh-CN": "神射手之誓"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

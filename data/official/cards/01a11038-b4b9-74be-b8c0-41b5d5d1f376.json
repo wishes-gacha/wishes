@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4b9-74be-b8c0-41b5d5d1f376",
+  "origin": "official",
+  "content": {
+    "zh-CN": "灵钥"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "erudition"
+    }
+  ]
+}

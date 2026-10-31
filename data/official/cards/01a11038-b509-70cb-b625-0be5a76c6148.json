@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b509-70cb-b625-0be5a76c6148",
+  "origin": "official",
+  "content": {
+    "zh-CN": "停云"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "electro"
+    },
+    {
+      "namespace": "fate",
+      "value": "harmony"
+    }
+  ]
+}

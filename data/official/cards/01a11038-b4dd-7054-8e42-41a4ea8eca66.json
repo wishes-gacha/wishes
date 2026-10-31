@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4dd-7054-8e42-41a4ea8eca66",
+  "origin": "official",
+  "content": {
+    "zh-CN": "别让世界静下来"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "erudition"
+    }
+  ]
+}

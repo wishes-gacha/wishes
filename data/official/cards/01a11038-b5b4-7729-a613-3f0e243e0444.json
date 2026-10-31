@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5b4-7729-a613-3f0e243e0444",
+  "origin": "official",
+  "content": {
+    "zh-CN": "卡齐娜"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "geo"
+    },
+    {
+      "namespace": "profession",
+      "value": "polearm"
+    }
+  ]
+}

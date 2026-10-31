@@ -1,0 +1,20 @@
+{
+  "global_id": "01a0fbfa-c5cd-74ed-b666-1e5e77d5c13f",
+  "origin": "official",
+  "name": {
+    "zh-CN": "冥途生花"
+  },
+  "deck_id": "01a0fbfa-c5c9-7d1c-abd3-c60a99445643",
+  "logic_id": "01a0fbfa-c5cb-73e8-a665-d217e756e148",
+  "state_scope": "banner",
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "event",
+      "value": "up"
+    }
+  ]
+}

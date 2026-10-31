@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b54d-70f4-ad57-920284d2c0c5",
+  "origin": "official",
+  "content": {
+    "zh-CN": "火花"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "pyro"
+    },
+    {
+      "namespace": "fate",
+      "value": "elation"
+    }
+  ]
+}

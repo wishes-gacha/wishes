@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5fd-743f-9102-048eda7b3df2",
+  "origin": "official",
+  "content": {
+    "zh-CN": "雅珂达"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

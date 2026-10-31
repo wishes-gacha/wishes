@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b53a-7755-8c13-9b93d9d7d7eb",
+  "origin": "official",
+  "content": {
+    "zh-CN": "Saber"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "fate",
+      "value": "destruction"
+    }
+  ]
+}

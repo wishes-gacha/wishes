@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5e6-7203-8cdc-f7267805091f",
+  "origin": "official",
+  "content": {
+    "zh-CN": "罗莎莉亚"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "profession",
+      "value": "polearm"
+    }
+  ]
+}

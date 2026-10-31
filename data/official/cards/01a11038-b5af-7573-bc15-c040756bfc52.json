@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5af-7573-bc15-c040756bfc52",
+  "origin": "official",
+  "content": {
+    "zh-CN": "凯亚"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    }
+  ]
+}

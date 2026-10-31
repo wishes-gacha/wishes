@@ -7,9 +7,10 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BannerSummary } from '../types';
+import { pickLocalized, useLocaleText } from '../composables/useLocaleText';
 
 defineEmits<{
-  (e: "select-banner", bannerId: number): void
+  (e: "select-banner", bannerId: string): void
 }>();
 
 defineProps<{
@@ -17,6 +18,7 @@ defineProps<{
 }>();
 
 const { t } = useI18n();
+const { currentLocale } = useLocaleText();
 
 
 // 背景光晕实现
@@ -54,14 +56,14 @@ const resetGlow = () => {
     <div class="banner-grid" v-if="banners.length">
       <div
         v-for="banner in banners"
-        :key="banner.id"
+        :key="banner.global_id"
         class="banner-card"
-        @click="$emit('select-banner', banner.id)"
+        @click="$emit('select-banner', banner.global_id)"
       >
         <div class="banner-thumbnail">
           <div class="thumbnail-placeholder"></div>
         </div>
-        <div class="banner-name">{{ banner.name }}</div>
+        <div class="banner-name">{{ pickLocalized(banner.name, currentLocale) }}</div>
         <div class="banner-tags">
           <span
             v-for="tag in banner.tags"
@@ -71,7 +73,6 @@ const resetGlow = () => {
             {{ tag.value }}
           </span>
         </div>
-        <div class="banner-id">ID: {{ banner.id }}</div>
       </div>
     </div>
   </div>
@@ -181,7 +182,6 @@ const resetGlow = () => {
 .banner-name {
   font-weight: 500;
   font-size: 1.5rem;
-  margin-bottom: 4px;
 }
 
 .banner-tags {
@@ -196,13 +196,6 @@ const resetGlow = () => {
   border-radius: 100px;
   font-size: 1.2rem;
   color: #b0c0d0;
-}
-
-.banner-id {
-  position: absolute;
-  font-size: 1rem;
-  color: #6a7a90;
-  bottom: 8px;
 }
 
 .back-body {

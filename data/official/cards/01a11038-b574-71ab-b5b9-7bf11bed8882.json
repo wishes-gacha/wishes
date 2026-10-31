@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b574-71ab-b5b9-7bf11bed8882",
+  "origin": "official",
+  "content": {
+    "zh-CN": "匣里灭辰"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "polearm"
+    }
+  ]
+}

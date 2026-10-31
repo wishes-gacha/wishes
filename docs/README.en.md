@@ -35,16 +35,46 @@ It manages all cards, decks, banners, and wish logic through a unified *tag syst
 
 > In fact, it goes beyond games: if you wish, `Wishes` can simulate **almost any** random system.
 
-All data is stored **locally**; the logic state of each banner (such as pity counters) is persisted to `SQLite`, and each banner is independent.
+All data is stored **locally**. Any edit a user makes to **read-only source** data (official / packs) **forks** a local copy — the original is never modified. This is the **data fork model**.
+
+The runtime state of each banner (such as pity counters) is persisted to `SQLite`, keyed by a **state scope**: by default each banner maintains its own state independently, and multiple banners may also share a single state (e.g. pity inheriting across banners).
+
+## v0.2.0 Important Update
+
+> [!WARNING]
+>
+> **This update contains incompatible changes to the data format.** On startup, the loader reads `version.json` at the root of the data directory and validates the version. If the version does not match, it fails immediately, **with no automatic migration**. When upgrading, please reorganize your data directory according to the v2 format.
+
+- **Data Format v2**
+  - All core objects (cards / decks / logic / banners) now use a unified `GlobalId` (Uuid v7) as their unique identifier, replacing the auto-incrementing integer Ids of the previous version.
+  - User-facing text fields (card content, deck name, banner name, logic name) are now stored as **localized maps** (locale → text), with the frontend falling back by the current UI locale.
+  - Every object carries a **source** marker: `official`, `local`, or `pack:<name>`.
+  - Data is **physically separated by source**: `data/official/` and `data/packs/<name>/` are read-only, while `data/local/` is writable.
+
+- **Data Fork Model**
+  - Editing an object from a read-only source no longer modifies it in place. Instead, a local copy is **forked** (new `GlobalId`, `origin = local`, `forked_from` pointing to the original).
+  - A forked object can choose whether to **shadow** the original: when shadowing, the original is hidden from lists and wish queries, and deck references are redirected to the forked object through the local overlay (SQLite; official files are never modified); unshadowing makes references resolve back to the original. Currently, cards support toggling the shadow manually, with the corresponding deck UI to be added in a later release.
+  - Deleting a forked object restores the original to visibility automatically.
+
+- **State Scope**
+  - The storage key for a banner's runtime state has been changed from "banner Id" to "scope key":
+    - `banner:<uuid>` (default): each banner maintains its own state.
+    - `group:<name>`: multiple banners in the same group share a single state (e.g. pity inheriting across banners).
+  - **Incompatible with old databases**: if the legacy v1 table structure is detected, it will be recreated at startup, and old pity progress will be lost.
+
+- **Other**
+  - The loader now performs cross-source `GlobalId` uniqueness checks, as well as existence checks on the decks / logic referenced by banners.
 
 ## Feature List
 
 - [x] Tag system
 - [x] Banner loading
 - [x] Complete wish flow
+- [x] Data format v2 (GlobalId / localized text / source separation)
+- [x] Data fork model (forking local copies when editing read-only source objects)
 - [ ] Data management
-  - [x] Card management
-  - [x] Deck management
+  - [x] Card management (with forking and shadow toggling)
+  - [x] Deck management (forking supported; shadow toggling pending)
   - [ ] Wish logic management
   - [ ] Banner management
 - [ ] Deck declaration rules
@@ -80,14 +110,16 @@ All data is stored **locally**; the logic state of each banner (such as pity cou
 - [ ] Card artwork management
 - [ ] Improved wish animation
 - [ ] Internationalization
-  - [x] Simplified Chinese
-  - [ ] English
-  - [ ] Japanese
+  - [x] UI localization
+  - [ ] Data localization (data file translation pending)
+    - [x] Simplified Chinese
+    - [ ] English
+    - [ ] Japanese
 - [ ] Initialization guide
 
 ### Planned
 
-- [ ] Establish a remote data repository, automatically pull updates, and via setting `Tracked Games` only fetch required content
+- [ ] Establish a remote data repository (`wishes-data`), automatically pull updates, and via setting `Tracked Games` only fetch required content
 
 ## Quick Start
 
@@ -95,7 +127,7 @@ All data is stored **locally**; the logic state of each banner (such as pity cou
 
 Regular users can quickly experience `Wishes` via pre-compiled installers.
 
-Go to the [**Releases**](https://github.com/G-GAZE/wishes/releases) page and download the latest installer for your platform.
+Go to the [**Releases**](https://github.com/wishes-gacha/wishes/releases) page and download the latest installer for your platform.
 
 After downloading, install and launch it as usual. On first launch, the built-in default cards, decks, logics, and banner data will be copied to the user data directory.
 

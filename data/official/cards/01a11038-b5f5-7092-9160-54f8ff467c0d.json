@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5f5-7092-9160-54f8ff467c0d",
+  "origin": "official",
+  "content": {
+    "zh-CN": "赛索斯"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "electro"
+    },
+    {
+      "namespace": "profession",
+      "value": "bow"
+    }
+  ]
+}

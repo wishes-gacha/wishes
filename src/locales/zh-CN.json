@@ -1,4 +1,9 @@
 {
+  "locale": {
+    "zh-CN": "简体中文",
+    "en": "English",
+    "ja": "日本語"
+  },
   "common": {
     "loading": "加载中…",
     "open": "打开",
@@ -73,6 +78,11 @@
   "card": {
     "name": "名称",
     "namePlaceholder": "输入卡片名称",
+    "nameRequired": "需至少填写一种语言",
+    "title": "称号 / 副标题",
+    "titlePlaceholder": "输入卡片称号 (可留空)",
+    "forkedFrom": "派生自「{name}」",
+    "forkEditHint": "该卡片来自只读来源, 编辑将派生出一个本地副本",
     "tags": "标签",
     "noTags": "暂无标签",
     "availableTags": "可选标签",
@@ -92,6 +102,7 @@
     "create": "+ 新建卡片",
     "edit": "编辑",
     "delete": "删除",
+    "deleteSuccess": "删除成功",
     "editTitle": "编辑卡片",
     "createTitle": "创建卡片",
     "save": "保存",
@@ -100,13 +111,29 @@
     "deleteConfirmContent": "确定要删除卡片「{name}」吗？",
     "deleteWarning": "⚠ 此操作不可撤销",
     "deleteRefDeckWarning": "该卡片被以下卡组显式引用，删除后这些卡组将不再包含它：",
+    "deleteRefDeckForkInfo": "该卡片被以下卡组显式引用；删除后这些引用将自动重写为原卡片，卡组内容不会丢失：",
+    "deleteForkRestore": "删除后，原卡片「{name}」将重新可见。",
+    "refDecksLoadFailed": "获取卡片引用列表失败: {error}",
     "detailEmpty": "选择一张卡片查看详情",
     "noMatch": "没有匹配的卡片",
     "deleteFailed": "删除卡片失败",
     "deleteError": "删除卡片失败: {error}",
     "loadFailed": "加载卡片失败: {error}",
     "createFailed": "创建卡片失败: {error}",
-    "updateFailed": "更新卡片失败: {error}"
+    "updateFailed": "更新卡片失败: {error}",
+    "shadowSourceLabel": "遮蔽原卡片",
+    "shadowSourceHint": "遮蔽后，原卡片将不会出现在卡片列表中（数据仍保留）",
+    "shadowedYes": "已遮蔽原卡片",
+    "shadowedNo": "未遮蔽原卡片",
+    "shadowAction": "启用遮蔽",
+    "unshadowAction": "撤销遮蔽",
+    "shadowEnabled": "已启用遮蔽，原卡片已隐藏",
+    "shadowDisabled": "已撤销遮蔽，原卡片已恢复显示",
+    "derivedExistsTitle": "该卡片已有派生版本",
+    "derivedExistsContent": "「{name}」的派生版本已存在。为避免引用混乱，请直接编辑派生版本；若想以官方内容重新开始，请先在列表中删除派生版本。",
+    "editDerivedAction": "编辑派生版本",
+    "derivedNotFound": "未找到派生版本，请刷新列表后重试",
+    "hasDerived": "已有派生"
   },
   "logic": {
     "managerTitle": "逻辑管理"
@@ -115,6 +142,7 @@
     "managerTitle": "卡池管理"
   },
   "deck": {
+    "forkedFrom": "派生自「{name}」",
     "searchPlaceholder": "搜索卡组...",
     "totalCounter": "总数 {filtered} / {total}",
     "create": "+ 新建卡组",
@@ -174,5 +202,13 @@
     "up": "概率提升",
     "fes": "节日限定",
     "appoint": "定轨"
+  },
+  "localizedInput": {
+    "panelTitle": "输入其他语言"
+  },
+  "origin": {
+    "official": "官方",
+    "local": "本地",
+    "pack": "拓展包: {name}"
   }
 }

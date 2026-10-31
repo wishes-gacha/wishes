@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5f1-736f-86bb-5c6562552735",
+  "origin": "official",
+  "content": {
+    "zh-CN": "行秋"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    },
+    {
+      "namespace": "attribute",
+      "value": "hydro"
+    }
+  ]
+}

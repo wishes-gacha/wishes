@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4ae-7712-81c3-c6ddf99f0af3",
+  "origin": "official",
+  "content": {
+    "zh-CN": "幽邃"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "nihility"
+    }
+  ]
+}

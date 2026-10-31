@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4f9-7381-91c6-3c2e4a3c8b10",
+  "origin": "official",
+  "content": {
+    "zh-CN": "舞！舞！舞！"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "harmony"
+    }
+  ]
+}

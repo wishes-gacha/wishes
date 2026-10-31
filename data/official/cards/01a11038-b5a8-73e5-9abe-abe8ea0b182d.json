@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5a8-73e5-9abe-abe8ea0b182d",
+  "origin": "official",
+  "content": {
+    "zh-CN": "伊安珊"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "electro"
+    },
+    {
+      "namespace": "profession",
+      "value": "polearm"
+    }
+  ]
+}

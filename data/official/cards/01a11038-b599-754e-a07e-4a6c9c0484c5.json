@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b599-754e-a07e-4a6c9c0484c5",
+  "origin": "official",
+  "content": {
+    "zh-CN": "钟剑"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "claymore"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b611-7497-8f74-1637209f083d",
+  "origin": "official",
+  "content": {
+    "zh-CN": "莫娜"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    },
+    {
+      "namespace": "attribute",
+      "value": "hydro"
+    }
+  ]
+}

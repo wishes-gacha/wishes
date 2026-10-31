@@ -11,7 +11,7 @@
 
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use serde::{Serialize, Deserialize};
 
 
@@ -171,7 +171,7 @@ impl From<&str> for EventTag {
 pub struct Tagged<T> {
     #[serde(flatten)]
     pub inner: T,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub tags: HashSet<Tag>
 }
 
@@ -222,11 +222,29 @@ impl<T> Tagged<T> {
     pub fn iter_tags(&self) -> impl Iterator<Item = &Tag> {
         self.tags.iter()
     }
+
+    /// 传入迭代器替换整个标签集合
+    pub fn set_tags(&mut self, tags: impl Iterator<Item = Tag>) {
+        self.tags = tags.collect()
+    }
+
+    /// 按命名空间字母序排序后的标签列表 (用于接口响应与展示, 保证顺序稳定).
+    pub fn sorted_tags(&self) -> Vec<Tag> {
+        let mut tags: Vec<Tag> = self.tags.iter().cloned().collect();
+        tags.sort_by(|a, b| a.namespace.cmp(&b.namespace).then_with(|| a.value.cmp(&b.value)));
+        tags
+    }
 }
 
 impl<T> Deref for Tagged<T> {
     type Target = T;
     fn deref(&self) -> &Self::Target {
         &self.inner
+    }
+}
+
+impl<T> DerefMut for Tagged<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
     }
 }

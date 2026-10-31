@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b507-763a-ac61-7836d79f0afd",
+  "origin": "official",
+  "content": {
+    "zh-CN": "佩拉"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "fate",
+      "value": "nihility"
+    }
+  ]
+}

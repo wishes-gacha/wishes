@@ -8,7 +8,7 @@ pub struct LogicResult {
     pub tags: Vec<Tag>,
     /// 活动标签 (用于 `Deck.query_cards` 的 `event_tags`).
     pub event_tags: Vec<EventTag>,
-    // pub appointed_card: Option<CardId>
+    // pub appointed_card: Option<GlobalId>
 }
 
 impl Default for LogicResult {

@@ -4929,7 +4929,7 @@ dependencies = [
 
 [[package]]
 name = "wishes"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "dashmap",
@@ -4946,6 +4946,7 @@ dependencies = [
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
+ "uuid",
  "walkdir",
 ]
 

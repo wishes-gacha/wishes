@@ -2,16 +2,17 @@
 import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { DeckSummary, EventGroup, Membership } from '../../api/decks';
-import type { EventTag, Tag } from '../../types';
+import type { EventTag, Tag, LocalizedString } from '../../types';
 import TagSelector from '../common/TagSelector.vue';
 import ConditionEditor from '../deck/ConditionEditor.vue';
 import { eventTagLabel } from '../../constants/eventTags.ts';
 import EventGroupModal from './EventGroupModal.vue';
 import { useDialog } from 'naive-ui';
 import { cloneDeep } from 'lodash-es';
+import { DEFAULT_DATA_LOCALE } from '../../composables/useLocaleText.ts';
 
 interface DeckFormData {
-  name: string, 
+  name: LocalizedString, 
   tags: Tag[],
   members: Membership,
   event_groups: Record<EventTag, EventGroup>,
@@ -31,18 +32,28 @@ const isEditMode = computed(() => !!props.deck);
 
 function createEmptyForm(): DeckFormData {
   return {
-    name: '',
+    name: { [DEFAULT_DATA_LOCALE]: '' },
     tags: [],
     members: { conditions: [] },
     event_groups: {},
   };
 }
 
+/** 去掉空字符串, 与后端的 LocalizedString 约定一致. */
+function compactName(): LocalizedString {
+  return Object.fromEntries(
+    Object.entries(formData.name).filter(([, v]) => v && v.length > 0)
+  );
+}
+
+/** 至少一种语言有名称才可保存 */
+const hasName = computed(() => Object.keys(compactName()).length > 0)
+
 /** 深拷贝原数据, 以便取消可回滚 */
 const formData = reactive<DeckFormData>(
   props.deck
     ? {
-        name: props.deck.name,
+        name: { ...props.deck.name },
         tags: cloneDeep(props.deck.tags),
         members: cloneDeep(props.deck.members),
         event_groups: cloneDeep(props.deck.event_groups),
@@ -84,13 +95,6 @@ function removeMemberCondition(index: number) {
 // 添加 event group
 function addEventGroup() {
   showEventGroupModal.value = true;
-  // const tag = prompt('输入活动标签 (EventTag)');
-  // if (tag && tag.trim()) {
-  //   const key = tag.trim() as EventTag;
-  //   if (!formData.event_groups[key]) {
-  //     formData.event_groups[key] = { conditions: [] };
-  //   }
-  // }
 }
 
 // 删除 event group
@@ -140,9 +144,9 @@ function confirmDelete(options: { title?: string, content: string, onConfirm: ()
 
 // 保存
 function save() {
-  if (formData.name === '') return;
+  if (!hasName.value) return;
   emit('save', {
-    name: formData.name,
+    name: compactName(),
     tags: formData.tags,
     members: formData.members,
     event_groups: formData.event_groups,
@@ -153,23 +157,18 @@ function save() {
 <template>
   <div class="deck-editor">
     <div class="editor-header">
-      <!-- <button class="btn-close" @click="emit('cancel')"></button> -->
       <h3>{{ isEditMode ? t('deck.editorTitleEdit') : t('deck.editorTitleCreate') }}</h3>
     </div>
 
     <div class="id-name-field">
-      <div v-if="isEditMode && deck" class="deck-id">ID {{ deck.id }}</div>
-      <label>{{ t('deck.nameLabel') }}</label>
-      <input v-model="formData.name" class="name-input" :placeholder="t('deck.namePlaceholder')" />
+      <label class="deck-name-title">{{ t('deck.nameLabel') }}</label>
+      <LocalizedInput
+        v-model="formData.name"
+        :placeholder="t('deck.namePlaceholder')"
+      />
     </div>
 
     <div class="editor-body">
-      <!-- 名称 -->
-      <!-- <div class="id-name-field">
-        <div class="deck-id">ID {{ deck.id }}</div>
-        <label>名称</label>
-        <input v-model="formData.name" class="name-input" />
-      </div> -->
 
       <!-- 标签 -->
       <div class="field">
@@ -227,7 +226,7 @@ function save() {
 
     <div class="editor-footer">
       <button class="btn-cancel" @click="emit('cancel')">{{ t('common.cancel') }}</button>
-      <button class="btn-save" @click="save" :disabled="formData.name === ''">{{ t('deck.save') }}</button>
+      <button class="btn-save" @click="save" :disabled="!hasName">{{ t('deck.save') }}</button>
     </div>
   </div>
 </template>
@@ -252,15 +251,62 @@ function save() {
   font-size: 2rem;
   margin: 0;
 }
-.btn-close {
-  background: none;
-  border: none;
-  color: #6a7a90;
+.btn-toggle-locales {
+  flex: 0 0 auto;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #212830;
+  border: 1px solid #2d3642;
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: #8a99b4;
   font-size: 1.5rem;
   cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
-.btn-close:hover {
+.btn-toggle-locales:hover {
+  background: #2d3642;
+  color: #e0e3e7;
+}
+.btn-toggle-locales .toggle-arrow {
+  display: inline-block;
+  transition: transform 0.5s ease;
+}
+.btn-toggle-locales.active .toggle-arrow {
+  transform: rotate(180deg);
+}
+.locale-badge {
+  background: #007bff;
   color: #fff;
+  border-radius: 8px;
+  padding: 0 6px;
+  font-size: 1rem;
+  line-height: 16px;
+}
+
+.other-locales {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+/* 展开 / 折叠动画 */
+.locale-slide-enter-active,
+.locale-slide-leave-active {
+  transition: max-height 0.5s ease, opacity 0.3s ease;
+}
+.locale-slide-enter-from,
+.locale-slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.locale-slide-enter-to,
+.locale-slide-leave-from {
+  max-height: 600px; /* 足够容纳很多语言 */
+  opacity: 1;
 }
 
 .editor-body {
@@ -305,37 +351,29 @@ function save() {
   margin-bottom: 12px;
 }
 
-.deck-id {
-  background: #4b7ac1;
-  text-align: center;
-  color: #fff;
-  font-size: 1.2rem;
-  letter-spacing: 0.3px;
-  padding: 3px 8px 3px 10px;
-  border-radius: 100px 100px 100px 100px;
-  margin-right: 16px;
-}
-
-.id-name-field label {
-  font-size: 1.3rem;
-  font-weight: 500;
+.deck-name-title {
+  flex-shrink: 0;
+  font-size: 1.5rem;
   color: #b0c0d0;
 }
 
-.name-input {
-  flex: 1;
-  border: none;
-  border-radius: 0 5px 0 0;
-  border-bottom: 2px solid #2a3340;
-  background: #141a22;
-  padding: 6px 8px;
-  font-size: 1.2rem;
-  min-width: 180px;
-  color: #e0e3e7;
+.name-locales {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
 }
-.name-input:focus {
-  outline: none;
-  border-color: #007bff;
+.name-locale-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.name-locale-label {
+  flex: 0 0 68px;
+  font-size: 1.1rem;
+  color: #6a7a90;
+  text-align: right;
+  user-select: none;
 }
 
 .form-input {

@@ -1,0 +1,13 @@
+{
+  "global_id": "01a0fbfa-c5cb-73e8-a665-d217e756e148",
+  "origin": "official",
+  "name": {
+    "zh-CN": "崩坏星穹铁道角色 UP 池逻辑"
+  },
+  "variant": {
+    "variant": "Hardcoded",
+    "config": {
+      "executor_name": "starrail_character_up"
+    }
+  }
+}

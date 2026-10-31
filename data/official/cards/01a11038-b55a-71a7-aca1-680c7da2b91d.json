@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b55a-71a7-aca1-680c7da2b91d",
+  "origin": "official",
+  "content": {
+    "zh-CN": "以理服人"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "claymore"
+    }
+  ]
+}

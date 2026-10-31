@@ -1,4 +1,9 @@
 {
+  "locale": {
+    "zh-CN": "简体中文",
+    "en": "English",
+    "ja": "日本語"
+  },
   "common": {
     "loading": "Loading…",
     "open": "Open",
@@ -73,6 +78,11 @@
   "card": {
     "name": "Name",
     "namePlaceholder": "Enter card name",
+    "nameRequired": "At least one language is required",
+    "title": "Title / Subtitle",
+    "titlePlaceholder": "Enter card title (optional)",
+    "forkedFrom": "Forked from「{name}」",
+    "forkEditHint": "This card comes from a read-only source; editing will create a local fork.",
     "tags": "Tags",
     "noTags": "No tags",
     "availableTags": "Available Tags",
@@ -92,6 +102,7 @@
     "create": "+ New Card",
     "edit": "Edit",
     "delete": "Delete",
+    "deleteSuccess": "Deleted",
     "editTitle": "Edit Card",
     "createTitle": "Create Card",
     "save": "Save",
@@ -100,13 +111,29 @@
     "deleteConfirmContent": "Delete card \"{name}\"?",
     "deleteWarning": "⚠ This action cannot be undone",
     "deleteRefDeckWarning": "This card is explicitly referenced by the following decks, and once it is deleted, these decks will no longer contain it:",
+    "deleteRefDeckForkInfo": "This card is explicitly referenced by the following decks; after deletion, these references will be automatically rewritten to the original card, and deck contents will be preserved:",
+    "deleteForkRestore": "After deletion, the original card \"{name}\" will become visible again.",
+    "refDecksLoadFailed": "Failed to load referencing decks: {error}",
     "detailEmpty": "Select a card to view details",
     "noMatch": "No matching cards",
     "deleteFailed": "Failed to delete the card",
     "deleteError": "Failed to delete the card: {error}",
     "loadFailed": "Failed to load cards: {error}",
     "createFailed": "Failed to create the card: {error}",
-    "updateFailed": "Failed to update the card: {error}"
+    "updateFailed": "Failed to update the card: {error}",
+    "shadowSourceLabel": "Shadow original card",
+    "shadowSourceHint": "When shadowed, the original card is hidden from the card list (data is preserved)",
+    "shadowedYes": "Original card shadowed",
+    "shadowedNo": "Original card visible",
+    "shadowAction": "Enable shadow",
+    "unshadowAction": "Remove shadow",
+    "shadowEnabled": "Shadow enabled, original card hidden",
+    "shadowDisabled": "Shadow removed, original card is visible again",
+    "derivedExistsTitle": "This card already has a derived version",
+    "derivedExistsContent": "\"{name}\" already has a derived version. To avoid reference confusion, please edit the derived version directly. If you want to start over from the original content, delete the derived version first.",
+    "editDerivedAction": "Edit derived version",
+    "derivedNotFound": "Derived version not found. Please refresh the list and try again.",
+    "hasDerived": "Has derived"
   },
   "logic": {
     "managerTitle": "Logic Management"
@@ -115,6 +142,7 @@
     "managerTitle": "Banner Management"
   },
   "deck": {
+    "forkedFrom": "Forked from「{name}」",
     "searchPlaceholder": "Search decks…",
     "totalCounter": "Total {filtered} / {total}",
     "create": "+ New Deck",
@@ -174,5 +202,13 @@
     "up": "Rate-Up",
     "fes": "Festival Limited",
     "appoint": "Appointed"
+  },
+  "localizedInput": {
+    "panelTitle": "Input Other Languages"
+  },
+  "origin": {
+    "official": "official",
+    "local": "local",
+    "pack": "pack: {name}"
   }
 }

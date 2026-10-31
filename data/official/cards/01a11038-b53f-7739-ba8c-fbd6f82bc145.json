@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b53f-7739-ba8c-fbd6f82bc145",
+  "origin": "official",
+  "content": {
+    "zh-CN": "姬子"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "pyro"
+    },
+    {
+      "namespace": "fate",
+      "value": "erudition"
+    }
+  ]
+}

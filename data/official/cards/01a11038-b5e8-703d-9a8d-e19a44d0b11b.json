@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5e8-703d-9a8d-e19a44d0b11b",
+  "origin": "official",
+  "content": {
+    "zh-CN": "芭芭拉"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "hydro"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

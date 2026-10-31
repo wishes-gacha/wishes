@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5ce-731e-9f5f-38b2e316a1b6",
+  "origin": "official",
+  "content": {
+    "zh-CN": "早柚"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "profession",
+      "value": "claymore"
+    }
+  ]
+}

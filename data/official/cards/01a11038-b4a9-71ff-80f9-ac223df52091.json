@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4a9-71ff-80f9-ac223df52091",
+  "origin": "official",
+  "content": {
+    "zh-CN": "嘉果"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "abundance"
+    }
+  ]
+}

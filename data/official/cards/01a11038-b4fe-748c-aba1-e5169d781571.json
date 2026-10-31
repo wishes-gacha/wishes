@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4fe-748c-aba1-e5169d781571",
+  "origin": "official",
+  "content": {
+    "zh-CN": "论剑"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "the_hunt"
+    }
+  ]
+}

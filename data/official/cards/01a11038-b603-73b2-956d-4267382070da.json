@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b603-73b2-956d-4267382070da",
+  "origin": "official",
+  "content": {
+    "zh-CN": "鹿野院平藏"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b56d-76b8-bb4c-de9e131dd933",
+  "origin": "official",
+  "content": {
+    "zh-CN": "魔导绪论"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "3"
+    },
+    {
+      "namespace": "type",
+      "value": "weapon"
+    },
+    {
+      "namespace": "profession",
+      "value": "catalyst"
+    }
+  ]
+}

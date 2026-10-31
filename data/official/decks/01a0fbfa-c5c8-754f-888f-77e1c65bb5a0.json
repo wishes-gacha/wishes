@@ -1,0 +1,87 @@
+{
+  "global_id": "01a0fbfa-c5c8-754f-888f-77e1c65bb5a0",
+  "origin": "official",
+  "name": {
+    "zh-CN": "崩坏星穹铁道火花 UP 卡组"
+  },
+  "members": {
+    "conditions": [
+      {
+        "type": "tag_all",
+        "tags": [
+          {
+            "namespace": "game",
+            "value": "starrail"
+          },
+          {
+            "namespace": "rarity",
+            "value": "3"
+          }
+        ]
+      },
+      {
+        "type": "tag_all",
+        "tags": [
+          {
+            "namespace": "game",
+            "value": "starrail"
+          },
+          {
+            "namespace": "rarity",
+            "value": "4"
+          }
+        ]
+      },
+      {
+        "type": "include_ids",
+        "ids": [
+          "01a11038-b53d-7217-87b0-932f0e984cdb",
+          "01a11038-b53f-7739-ba8c-fbd6f82bc145",
+          "01a11038-b541-7350-8a6f-d05b6d869587",
+          "01a11038-b544-7651-abb7-40c82192c59d",
+          "01a11038-b548-72d1-a1c8-9b54eb392b4e",
+          "01a11038-b54f-7360-9384-bb004c8258e8",
+          "01a11038-b551-71a5-ad43-e8a259fac10d",
+          "01a11038-b54d-70f4-ad57-920284d2c0c5"
+        ]
+      }
+    ]
+  },
+  "event_groups": {
+    "standard": {
+      "conditions": [
+        {
+          "type": "all"
+        },
+        {
+          "type": "exclude_ids",
+          "ids": [
+            "01a11038-b54d-70f4-ad57-920284d2c0c5",
+            "01a11038-b507-763a-ac61-7836d79f0afd",
+            "01a11038-b515-776c-b8f7-a3832c589ce8",
+            "01a11038-b533-76f8-a15e-7578f488c784"
+          ]
+        }
+      ]
+    },
+    "up": {
+      "conditions": [
+        {
+          "type": "include_ids",
+          "ids": [
+            "01a11038-b54d-70f4-ad57-920284d2c0c5",
+            "01a11038-b507-763a-ac61-7836d79f0afd",
+            "01a11038-b515-776c-b8f7-a3832c589ce8",
+            "01a11038-b533-76f8-a15e-7578f488c784"
+          ]
+        }
+      ]
+    }
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    }
+  ]
+}

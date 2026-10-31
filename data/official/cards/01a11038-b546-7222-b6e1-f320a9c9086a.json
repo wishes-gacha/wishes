@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b546-7222-b6e1-f320a9c9086a",
+  "origin": "official",
+  "content": {
+    "zh-CN": "昔涟"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "5"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "fate",
+      "value": "remembrance"
+    }
+  ]
+}

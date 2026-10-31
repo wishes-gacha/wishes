@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b5a0-76a3-b08b-bfb062ca9a6c",
+  "origin": "official",
+  "content": {
+    "zh-CN": "久岐忍"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "genshin"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "electro"
+    },
+    {
+      "namespace": "profession",
+      "value": "sword"
+    }
+  ]
+}

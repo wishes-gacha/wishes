@@ -1,0 +1,25 @@
+{
+  "global_id": "01a11038-b4fc-70cd-81b2-af756ae97975",
+  "origin": "official",
+  "content": {
+    "zh-CN": "记忆中的模样"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "light_cone"
+    },
+    {
+      "namespace": "fate",
+      "value": "harmony"
+    }
+  ]
+}

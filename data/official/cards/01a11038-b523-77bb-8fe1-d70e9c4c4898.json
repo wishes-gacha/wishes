@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b523-77bb-8fe1-d70e9c4c4898",
+  "origin": "official",
+  "content": {
+    "zh-CN": "米沙"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "cryo"
+    },
+    {
+      "namespace": "fate",
+      "value": "destruction"
+    }
+  ]
+}

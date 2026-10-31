@@ -1,0 +1,29 @@
+{
+  "global_id": "01a11038-b505-7025-ba80-df3a8bb9454d",
+  "origin": "official",
+  "content": {
+    "zh-CN": "丹恒"
+  },
+  "tags": [
+    {
+      "namespace": "game",
+      "value": "starrail"
+    },
+    {
+      "namespace": "rarity",
+      "value": "4"
+    },
+    {
+      "namespace": "type",
+      "value": "character"
+    },
+    {
+      "namespace": "attribute",
+      "value": "anemo"
+    },
+    {
+      "namespace": "fate",
+      "value": "the_hunt"
+    }
+  ]
+}
