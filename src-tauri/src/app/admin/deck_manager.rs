@@ -189,13 +189,23 @@ impl DeckManager {
     /// 一个卡组通常被多个卡池引用, 自动改写会悄无声息地改变多个卡池的行为.
     /// UI 应提示用户是否切换到派生版本.
     pub fn fork_deck_from<F>(&self, source: &TaggedDeck, mutable: F) -> Result<TaggedDeck>
-    where 
+    where
         F: FnOnce(&mut TaggedDeck)
     {
+        let existing = self.deck_registry.derived_of(source.global_id);
+        if !existing.is_empty() {
+            anyhow::bail!(
+                "Deck {} 已存在派生对象 {:?}, 请编辑派生对象, 或先删除派生对象再重新派生",
+                source.global_id,
+                existing.iter().map(|id| id.to_string()).collect::<Vec<_>>()
+            )
+        }
+
         let mut derived = source.clone();
         derived.global_id = GlobalId::new();
         derived.origin = Origin::Local;
         derived.forked_from = Some(source.global_id);
+        derived.shadowed = true;
         mutable(&mut derived);
 
         if derived.name.is_empty() {
@@ -226,6 +236,15 @@ impl DeckManager {
             anyhow::bail!(
                 "Deck {} 存在派生对象 {:?}, 请先删除派生对象再删除原卡组",
                 id, derived.iter().map(|d| d.to_string()).collect::<Vec<_>>()
+            );
+        }
+
+        let deck = self.deck_registry.get_including_shadowed(id)
+            .ok_or_else(|| anyhow::anyhow!("Deck {} 不存在", id))?;
+        if deck.origin.is_read_only() {
+            anyhow::bail!(
+                "Deck {} 来自只读来源 `{}`, 不能删除; 如需修改请编辑派生对象",
+                id.0, deck.origin
             );
         }
 

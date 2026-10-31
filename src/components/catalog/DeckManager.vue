@@ -156,7 +156,7 @@ onMounted(() => {
               </div>
               <div class="deck-actions">
                 <button class="action-btn edit-btn" @click="handleEdit(deck.global_id)">{{ t('deck.edit') }}</button>
-                <button class="action-btn delete-btn" @click="handleDelete(deck.global_id)">{{ t('deck.delete') }}</button>
+                <button v-if="deck.origin === 'local'" class="action-btn delete-btn" @click="handleDelete(deck.global_id)">{{ t('deck.delete') }}</button>
               </div>
             </div>
           </div>

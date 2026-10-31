@@ -167,7 +167,7 @@ impl CardManager {
     /// 2. `origin` 改为 `local`, `forked_from` 指向原对象.
     /// 3. 写入 `data/local/cards/`.
     /// 4. 原对象保持不变, 并在列表/抽卡查询中被**遮蔽**.
-    /// 5. 所有显式引用原卡片的可见卡组重写为指向派生对象.
+    /// 5. 所有显式引用原卡片的卡组重写为指向派生对象.
     pub fn fork_card_from<F>(&self, source: &TaggedCard, shadow: bool, mutable: F) -> Result<TaggedCard>
     where
         F: FnOnce(&mut TaggedCard),
@@ -222,11 +222,14 @@ impl CardManager {
         Ok(derived)
     }
 
-    /// 把所有可见卡组中指向 `from` 的卡片引用改写为 `to`, 并持久化改动的卡组.
+    /// 把所有卡组 (含被遮蔽的卡组) 中指向 `from` 的卡片引用改写为 `to`, 并持久化改动的卡组.
+    ///
+    /// 被遮蔽的卡组仍可能被卡池引用 (卡组分叉不会自动改写 `Banner.deck_id`),
+    /// 因此引用重写不能跳过它们, 否则卡池会继续使用指向旧卡片的规则.
     fn redirect_card_references(&self, from: GlobalId, to: GlobalId) -> usize {
         let mut rewritten = 0;
 
-        for deck in self.deck_registry.all_visible() {
+        for deck in self.deck_registry.all_including_shadowed() {
             let mut updated = deck.as_ref().clone();
             let count = updated.redirect_card_refs(from, to);
             if count == 0 {
@@ -285,6 +288,13 @@ impl CardManager {
 
         let card = self.card_registry.get_including_shadowed(id)
             .ok_or_else(|| anyhow::anyhow!("Card {} 不存在", id))?;
+
+        if card.origin.is_read_only() {
+            anyhow::bail!(
+                "Card {} 来自只读来源 `{}`, 不能删除; 如需修改请编辑派生对象",
+                id.0, card.origin
+            );
+        }
 
         let source_id = card.forked_from;
         let is_fork = source_id.is_some();

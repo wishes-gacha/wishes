@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 
 use wishes_lib::{
     domain::{
-        card::Card, deck::{Deck, EventGroup, EventGroupCondition, Membership, MembershipCondition, TaggedDeck}, ids::GlobalId, localized_string::LocalizedString, tag::{EventTag, Tag, Tagged}
+        card::Card, deck::{Deck, EventGroup, EventGroupCondition, Membership, MembershipCondition, TaggedDeck}, ids::GlobalId, localized_string::LocalizedString, origin::Origin, tag::{EventTag, Tag, Tagged}
     }, infrastructure::registry::CardRegistry
 };
 
@@ -14,6 +14,21 @@ use wishes_lib::{
 fn card_in(registry: &CardRegistry, tags: Vec<(&str, &str)>) -> GlobalId {
     let card = Card::new(LocalizedString::single("zh-CN", "Test-Card"));
     let mut card = Tagged::new(card); 
+    for (namespace, value) in tags {
+        card.add_tag(Tag::new(namespace, value));
+    }
+    let id = card.global_id;
+    registry.insert(card);
+    id
+}
+
+/// 创建一张派生卡片 (遮蔽 `source`) 并注册, 返回其 `GlobalId`.
+fn derived_card_in(registry: &CardRegistry, source: GlobalId, tags: Vec<(&str, &str)>) -> GlobalId {
+    let mut card = Card::new(LocalizedString::single("zh-CN", "Derived-Card"));
+    card.origin = Origin::Local;
+    card.forked_from = Some(source);
+    card.shadowed = true;
+    let mut card = Tagged::new(card);
     for (namespace, value) in tags {
         card.add_tag(Tag::new(namespace, value));
     }
@@ -519,4 +534,48 @@ fn deck_query_genshin_character_up_simulation() {
 
     // 用到的武器卡片仅用于说明其被 type=character 过滤掉
     assert!(!result_std_set.contains(&w3) && !result_std_set.contains(&w4));
+}
+
+// 被遮蔽的原卡片不应出现在抽卡查询中
+#[test]
+fn deck_query_skips_shadowed_original() {
+    let registry = CardRegistry::new();
+    let original = card_in(&registry, vec![("game", "genshin"), ("rarity", "5")]);
+    let derived = derived_card_in(&registry, original, vec![("game", "genshin"), ("rarity", "5")]);
+
+    assert!(!registry.is_visible(original));
+    assert!(registry.is_visible(derived));
+
+    let deck = deck_with(
+        "Test-Deck",
+        membership(vec![MembershipCondition::TagAll {
+            tags: vec![Tag::new("game", "genshin")],
+        }]),
+        HashMap::new(),
+    );
+
+    assert_eq!(deck.query_cards(&registry, &[], &[]), vec![derived]);
+}
+
+// 活动组查询同样不应返回被遮蔽的原卡片
+#[test]
+fn deck_query_event_group_skips_shadowed_original() {
+    let registry = CardRegistry::new();
+    let original = card_in(&registry, vec![("game", "genshin"), ("rarity", "5")]);
+    let derived = derived_card_in(&registry, original, vec![("game", "genshin"), ("rarity", "5")]);
+
+    let mut event_groups = HashMap::new();
+    event_groups.insert(EventTag::up(), EventGroup {
+        conditions: vec![EventGroupCondition::All],
+    });
+
+    let deck = deck_with(
+        "Test-Deck",
+        membership(vec![MembershipCondition::TagAll {
+            tags: vec![Tag::new("game", "genshin")],
+        }]),
+        event_groups,
+    );
+
+    assert_eq!(deck.query_cards(&registry, &[], &[EventTag::up()]), vec![derived]);
 }

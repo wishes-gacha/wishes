@@ -152,9 +152,9 @@ impl AppState {
     /// 获取图鉴统计信息.
     pub fn get_catalog_stats(&self) -> CatalogStats {
         CatalogStats {
-            cards: self.card_registry.count(),
-            decks: self.deck_registry.count(),
-            logics: self.logic_registry.count_definitions(),
+            cards: self.card_registry.count_visible(),
+            decks: self.deck_registry.count_visible(),
+            logics: self.logic_registry.count_visible_definitions(),
         }
     }
 }

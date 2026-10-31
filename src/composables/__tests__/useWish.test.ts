@@ -73,4 +73,15 @@ describe("useWish", () => {
     expect(loading.value).toBe(false);
     expect(history.value[0]).toEqual(mockResults[0]);
   });
+
+  it("should surface a localized error when ten wish fails", async () => {
+    (invoke as any).mockRejectedValue(new Error("Test error"));
+
+    const { doWishTen, loading, error } = useWish();
+
+    await expect(doWishTen(bannerId)).rejects.toThrow("Test error");
+
+    expect(loading.value).toBe(false);
+    expect(error.value).toContain("wish.drawFailed");
+  });
 });

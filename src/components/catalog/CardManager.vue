@@ -462,7 +462,7 @@ const selectedCardTagClasses = computed(() => {
               @click="openEditModal(selectedCard)"
             >{{ t('card.edit') }}</button>
             <!-- <button class="btn-detail-edit" @click="openEditModal(selectedCard)">{{ t('card.edit') }}</button> -->
-            <button class="btn-detail-delete" @click="confirmDelete(selectedCard)">{{ t('card.delete') }}</button>
+            <button v-if="selectedCard.origin === 'local'" class="btn-detail-delete" @click="confirmDelete(selectedCard)">{{ t('card.delete') }}</button>
           </div>
         </div>
       </div>

@@ -404,6 +404,9 @@ impl Deck {
             // 若未来出现性能瓶颈, 再考虑引入 DeckResolver 服务
         }
 
+        // 被派生版本遮蔽的原对象不参与抽卡与覆盖性校验
+        cards.retain(|id| registry.contains_visible(*id));
+
         cards.into_iter().collect()
     }
 

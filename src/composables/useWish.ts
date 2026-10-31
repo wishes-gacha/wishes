@@ -71,7 +71,7 @@ export function useWish() {
       await loadBannerInfo(bannerId);
       return results;
     } catch (e) {
-      error.value = `抽卡失败: ${e}`;
+      error.value = t("wish.drawFailed", { error: e });
       throw e;
     } finally {
       loading.value = false;

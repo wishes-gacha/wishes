@@ -247,3 +247,94 @@ fn created_card_is_written_with_global_id_filename() {
 
     std::fs::remove_dir_all(&dir).ok();
 }
+
+// 只读来源的卡片不可删除 (官方/拓展包数据必须保持只读)
+#[test]
+fn delete_read_only_card_is_rejected() {
+    let card_registry = Arc::new(CardRegistry::new());
+    let deck_registry = Arc::new(DeckRegistry::new());
+
+    let mut official = Card::new(LocalizedString::single("zh-CN", "胡桃"));
+    official.origin = wishes_lib::domain::origin::Origin::Official;
+    let official_id = official.global_id;
+    card_registry.insert(Tagged::new(official));
+
+    let manager = create_manager(&card_registry, &deck_registry);
+    let err = manager.delete_card(official_id).unwrap_err();
+
+    assert!(err.to_string().contains("只读来源"), "错误信息应说明只读来源: {err}");
+    assert!(card_registry.get_including_shadowed(official_id).is_some(), "只读卡片不应被删除");
+}
+
+// 被遮蔽的卡组仍可能被卡池引用, 卡片分叉时也必须重写其显式引用
+#[test]
+fn forking_card_redirects_references_in_shadowed_decks() {
+    let card_registry = Arc::new(CardRegistry::new());
+    let deck_registry = Arc::new(DeckRegistry::new());
+
+    let dir = std::env::temp_dir().join(format!("wishes-shadow-deck-{}", uuid::Uuid::now_v7()));
+    let deck_dir = dir.join("local").join("decks");
+    std::fs::create_dir_all(&deck_dir).unwrap();
+
+    let mut official = Card::new(LocalizedString::single("zh-CN", "胡桃"));
+    official.origin = wishes_lib::domain::origin::Origin::Official;
+    let official_id = official.global_id;
+    card_registry.insert(Tagged::new(official));
+
+    // 源卡组 (会被派生卡组遮蔽)
+    let mut source = Deck::new(LocalizedString::single("zh-CN", "源卡组"));
+    source.members = Membership {
+        conditions: vec![MembershipCondition::IncludeIds {
+            ids: HashSet::from([official_id]),
+        }],
+    };
+    let source_id = source.global_id;
+    let source_path = deck_dir.join(format!("{}.json", source_id));
+    std::fs::write(&source_path, serde_json::to_string_pretty(&source).unwrap()).unwrap();
+    deck_registry.insert(Tagged::new(source.clone()));
+    deck_registry.insert_path(source_id, source_path.clone());
+
+    // 派生卡组, 遮蔽源卡组; 模拟"卡池仍引用源卡组"的活跃隐藏卡组
+    let mut derived = source.clone();
+    derived.global_id = GlobalId::new();
+    derived.origin = wishes_lib::domain::origin::Origin::Local;
+    derived.forked_from = Some(source_id);
+    derived.shadowed = true;
+    let derived_id = derived.global_id;
+    let derived_path = deck_dir.join(format!("{}.json", derived_id));
+    std::fs::write(&derived_path, serde_json::to_string_pretty(&derived).unwrap()).unwrap();
+    deck_registry.insert(Tagged::new(derived));
+    deck_registry.insert_path(derived_id, derived_path.clone());
+
+    assert!(!deck_registry.is_visible(source_id), "源卡组应被派生卡组遮蔽");
+    assert!(deck_registry.is_visible(derived_id));
+
+    let manager = create_manager(&card_registry, &deck_registry);
+    let derived_card = manager.update_card(
+        official_id,
+        LocalizedString::single("zh-CN", "我的胡桃"),
+        Vec::new(),
+        None,
+        None,
+    ).unwrap();
+
+    // 隐藏的源卡组也必须重写引用
+    let source_updated = deck_registry.get_including_shadowed(source_id).unwrap();
+    match &source_updated.members.conditions[0] {
+        MembershipCondition::IncludeIds { ids } => {
+            assert!(ids.contains(&derived_card.global_id), "隐藏卡组的引用应指向派生卡片");
+            assert!(!ids.contains(&official_id), "隐藏卡组不应再引用被遮蔽的原卡片");
+        }
+        other => panic!("成员条件类型不应改变: {:?}", other),
+    }
+
+    let persisted: Deck = serde_json::from_str(&std::fs::read_to_string(&source_path).unwrap()).unwrap();
+    match &persisted.members.conditions[0] {
+        MembershipCondition::IncludeIds { ids } => {
+            assert!(ids.contains(&derived_card.global_id), "隐藏卡组文件中的引用也应被重写");
+        }
+        other => panic!("成员条件类型不应改变: {:?}", other),
+    }
+
+    std::fs::remove_dir_all(&dir).ok();
+}

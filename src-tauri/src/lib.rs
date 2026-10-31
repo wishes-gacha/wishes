@@ -206,7 +206,7 @@ fn set_card_shadow(global_id: GlobalId, shadowed: bool, state: State<AppState>) 
 #[tauri::command]
 fn get_card_referencing_decks(global_id: GlobalId, state: State<AppState>) -> Result<Vec<DeckSummary>, String> {
     let decks = state.card_manager.referencing_decks(global_id);
-    Ok(decks.iter().map(|deck| DeckSummary::from(deck.as_ref())).collect())
+    Ok(decks.iter().map(|deck| DeckSummary::from_with_registry(deck.as_ref(), &state.deck_registry)).collect())
 }
 
 /// 获取所有卡组信息.
