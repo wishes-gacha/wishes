@@ -268,7 +268,7 @@ pub fn run() {
 
             app.manage(LogGuardState(log_guard));
 
-            tracing::info!(log_dir = %log_dir.display(), "日志系统已初始化");
+            tracing::debug!(log_dir = %log_dir.display(), "日志系统已初始化");
 
             let data_dir = get_or_create_data_dir(handle)
                 .with_context(|| "获取数据目录失败")?;
