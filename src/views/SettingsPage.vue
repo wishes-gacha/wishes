@@ -110,11 +110,12 @@ async function openLogDir() {
           <div class="setting-item">
             <span class="setting-label">{{ t('settings.dataDir') }}</span>
             <span class="setting-value">
-              <span class="path-text">{{ data_dir ?? t('common.loading') }}</span>
+              <span class="path-text" :title="data_dir ?? ''">{{ data_dir ?? t('common.loading') }}</span>
               <button
-                v-if="log_dir"
+                v-if="data_dir"
                 class="open-btn"
                 :disabled="dataDirOpening"
+                :title="data_dir ?? ''"
                 @click="openDataDir"
               >{{ t('common.open') }}</button>
             </span>
@@ -122,11 +123,12 @@ async function openLogDir() {
           <div class="setting-item">
             <span class="setting-label">{{ t('settings.logDir') }}</span>
             <span class="setting-value">
-              <span class="path-text">{{ log_dir ?? t('common.loading') }}</span>
+              <span class="path-text" :title="log_dir ?? ''">{{ log_dir ?? t('common.loading') }}</span>
               <button
                 v-if="log_dir"
                 class="open-btn"
                 :disabled="logDirOpening"
+                :title="log_dir ?? ''"
                 @click="openLogDir"
               >{{ t('common.open') }}</button>
             </span>
@@ -258,6 +260,7 @@ async function openLogDir() {
   white-space: nowrap;
   display: inline-block;
   vertical-align: bottom;
+  direction: rtl;
 }
 
 .open-btn {
