@@ -9,6 +9,7 @@ use serde::Serialize;
 use tauri::{AppHandle, Manager, path::BaseDirectory};
 
 use crate::utils::data_paths::DataPaths;
+use crate::domain::version::{DataVersion, VERSION_FILE_NAME};
 
 /// 获取最终使用的数据目录, 若目标目录不存在则资源中复制默认内容到目标目录.
 /// 
@@ -40,27 +41,63 @@ pub fn get_or_create_data_dir(handle: &AppHandle) -> Result<PathBuf> {
         .with_context(|| "无法获取用户数据目录")?;
     let target = user_data_dir.join("data");
 
+    // 仅在首次启动时复制, 已存在的用户数据不覆盖
     if !target.exists() {
-        // std::fs::create_dir_all(&target)?;
-        // let resource_dir = handle
-        //     .path()
-        //     .resource_dir()
-        //     .with_context(|| "无法获取资源目录")?;
-        // let source = resource_dir.join("data");
-
         let source = handle
             .path()
             .resolve("data", BaseDirectory::Resource)
             .with_context(|| "无法解析资源路径 'data'")?;
 
-        if source.exists() && check_data_dir(&source) {
+        if source.exists() {
+            tracing::info!(
+                source = %source.display(),
+                target = %target.display(),
+                "首次启动：从资源目录复制默认数据"
+            );
+
+            // 复制前不再强校验 source 的完整性：
+            //   - 打包工具可能遗漏空目录或 version.json
+            //   - 缺失项在下方 ensure_version_file / AppState::ensure_layout 中兜底
+            if !source.join("version.json").exists() {
+                tracing::warn!(
+                    source = %source.display(),
+                    "资源 data 目录缺少 version.json (可能被遗漏), 将自动补写"
+                );
+            }
+
             copy_dir_all(&source, &target)?;
+        } else {
+            tracing::warn!(
+                source = %source.display(),
+                "资源目录中未找到 data, 数据目录将为空"
+            );
+            std::fs::create_dir_all(&target)
+                .with_context(|| format!("创建数据目录失败 - dir: {}", target.display()))?;
         }
     }
+
+    // 兜底: 确保 version.json 一定存在
+    ensure_version_file(&target)?;
 
     tracing::info!(data_dir = %target.display(), "使用生成环境数据目录");
 
     Ok(target)
+}
+
+fn ensure_version_file(data_dir: &Path) -> Result<()> {
+    let path = data_dir.join(VERSION_FILE_NAME);
+    if path.exists() {
+        return Ok(());
+    }
+
+    tracing::warn!(
+        data_dir = %data_dir.display(),
+        "数据目录缺少 version.json，自动写入当前数据格式版本"
+    );
+    DataVersion::current()
+        .save(data_dir)
+        .map_err(|e| anyhow::anyhow!("自动写入 version.json 失败: {}", e))?;
+    Ok(())
 }
 
 /// 获取最终使用的数据库目录, 若不存在则自动创建
@@ -103,7 +140,7 @@ pub fn get_or_create_db_dir(handle: &AppHandle) -> Result<PathBuf> {
 /// 获取应用日志目录, 若不存在则创建.
 /// 
 /// - dev 构建: 使用项目根目录下的 `logs/`
-/// - release 构建: 使用 `app_log_dir()`
+/// - release 构建: 使用 `app_data_dir()/logs`, 与 `data/`、`db/` 同级
 pub fn get_or_create_log_dir(handle: &AppHandle) -> Result<PathBuf> {
     #[cfg(debug_assertions)]
     {
@@ -117,10 +154,13 @@ pub fn get_or_create_log_dir(handle: &AppHandle) -> Result<PathBuf> {
         }
     }
 
+    // 生产环境下与 data / db 等同目录, 保持运行时产物目录一致
     let dir = handle
         .path()
-        .app_log_dir()
-        .with_context(|| "无法获取应用日志目录")?;
+        .app_data_dir()
+        .with_context(|| "无法获取应用日志目录")?
+        .join("logs");
+
     if !dir.exists() {
         fs::create_dir_all(&dir).with_context(|| "创建日志目录失败")?;
     }
