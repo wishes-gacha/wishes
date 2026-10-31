@@ -27,7 +27,17 @@ dist/
 src-tauri/target/
 src-tauri/gen/
 
-scripts/
+# Python
+__pycache__/
+*.pyc
+
+# 仅放行迁移脚本及其测试, 其他本地脚本继续忽略
+scripts/*
+!scripts/README.md
+!scripts/migrate_v1_to_v2.py
+!scripts/v1_official_manifest.json
+!scripts/tests/
+!scripts/tests/*.py
 .VSCodeCounter/
 
 db/

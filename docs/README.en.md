@@ -44,6 +44,8 @@ The runtime state of each banner (such as pity counters) is persisted to `SQLite
 > [!WARNING]
 >
 > **This update contains incompatible changes to the data format.** On startup, the loader reads `version.json` at the root of the data directory and validates the version. If the version does not match, it fails immediately, **with no automatic migration**. When upgrading, please reorganize your data directory according to the v2 format.
+>
+> To keep your v1 data, use [`scripts/migrate_v1_to_v2.py`](../scripts/migrate_v1_to_v2.py) (see [`scripts/README.md`](../scripts/README.md)). The script does not modify the original data directory.
 
 - **Data Format v2**
   - All core objects (cards / decks / logic / banners) now use a unified `GlobalId` (Uuid v7) as their unique identifier, replacing the auto-incrementing integer Ids of the previous version.

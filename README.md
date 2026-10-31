@@ -36,6 +36,8 @@
 > [!WARNING]
 >
 > **本次更新包含数据格式的不兼容变更**。加载器启动时会读取数据目录根部的 `version.json` 并校验版本；版本不符时直接失败，**没有自动迁移**。升级时请按 v2 格式重新组织数据目录。
+>
+> 若需要保留 v1 数据，请使用 [`scripts/migrate_v1_to_v2.py`](scripts/migrate_v1_to_v2.py) 迁移（用法见 [`scripts/README.md`](scripts/README.md)）。脚本不会修改原始数据目录。
 
 - **数据格式 v2**
   - 所有核心对象（卡片 / 卡组 / 逻辑 / 卡池）统一使用 `GlobalId`（Uuid v7）作为唯一标识，取代旧版本的自增整数 Id。
