@@ -24,7 +24,6 @@ use crate::{
             CardSummary,
             CardUpdateRequest
         },
-        catalog_stats::CatalogStats,
         deck_response::{
             CreateDeckRequest,
             DeckSummary,
@@ -102,12 +101,6 @@ fn get_banners(state: State<AppState>) -> Result<Vec<BannerSummary>, String> {
 fn get_banner_info(banner_id: GlobalId, state: State<AppState>) -> Result<BannerInfo, String> {
     state.banner_service.get_banner_info(banner_id)
         .map_err(|e| log_command_err("get_banner_info", e))
-}
-
-/// 获取当前图鉴的统计信息.
-#[tauri::command]
-fn get_catalog_stats(state: State<AppState>) -> Result<CatalogStats, String> {
-    Ok(state.get_catalog_stats())
 }
 
 /// 获取当前使用的数据目录路径.
@@ -290,7 +283,6 @@ pub fn run() {
             wish_ten,
             get_banners,
             get_banner_info,
-            get_catalog_stats,
             get_data_dir_path,
             open_data_dir,
             get_log_dir_path,

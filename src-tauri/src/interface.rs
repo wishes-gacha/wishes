@@ -5,5 +5,4 @@
 pub mod wish_response;
 pub mod card_response;
 pub mod banner_info;
-pub mod catalog_stats;
 pub mod deck_response;

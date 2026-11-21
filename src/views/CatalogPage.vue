@@ -1,7 +1,6 @@
 <script setup lang="ts">
 /**
- * 图鉴页面, 展示卡片、卡组、逻辑的统计数量
- * 调用后端命令 `get_catalog_stats` 获取数据
+ * 图鉴页面, 管理卡片、卡组、逻辑与卡池
  */
 
 import { computed, ref } from 'vue';
@@ -11,26 +10,6 @@ import DeckManager from '../components/catalog/DeckManager.vue';
 import LogicManager from '../components/catalog/LogicManager.vue';
 import BannerManager from '../components/catalog/BannerManager.vue';
 
-
-// const stats = ref<CatalogStats | null>(null);
-// const loading = ref(false);
-
-
-// onMounted(() => {
-//   const loadCatalogStats = async () => {
-//     loading.value = true;
-//     try {
-//       stats.value = await invoke<CatalogStats>("get_catalog_stats", {});
-//     } catch (e) {
-//       console.error("获取图鉴统计数据失败: ", e)
-//       stats.value = null;
-//     } finally {
-//       loading.value = false;
-//     }
-//   }
-
-//   loadCatalogStats();
-// })
 
 const { t } = useI18n();
 

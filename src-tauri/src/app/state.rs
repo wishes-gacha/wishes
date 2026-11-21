@@ -23,7 +23,7 @@ use crate::{
             overlay_repo::{OverlayRepository, RefKind},
             state_repo::StateRepository
         }
-    }, interface::catalog_stats::CatalogStats, utils::data_paths::DataPaths
+    }, utils::data_paths::DataPaths
 };
 use super::loader::Loader;
 
@@ -164,14 +164,5 @@ impl AppState {
     /// 执行一次抽卡, 委托给 `banner_service`.
     pub fn wish(&self, banner_id: GlobalId) -> Result<WishResult> {
         self.banner_service.wish(banner_id)
-    }
-
-    /// 获取图鉴统计信息.
-    pub fn get_catalog_stats(&self) -> CatalogStats {
-        CatalogStats {
-            cards: self.card_registry.count_visible(),
-            decks: self.deck_registry.count_visible(),
-            logics: self.logic_registry.count_visible_definitions(),
-        }
     }
 }
