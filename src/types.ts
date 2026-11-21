@@ -101,12 +101,3 @@ export interface BannerInfo {
   state_scope: string,
   total_counter: number,
 }
-
-/**
- * 图鉴统计信息
- */
-export interface CatalogStats {
-  cards: number,
-  decks: number,
-  logics: number,
-}

@@ -182,7 +182,7 @@ npm run tauri build
 ## 更多文档
 
 - [**`Wishes` 核心概念**](docs/concepts.md)：`Wishes` 的灵活性来自一些小巧而通用的抽象概念，理解这些概念后即可自定义 **任意** 卡池。
-- **`data/` 数据目录结构说明** (待补充)
+- [**`data/` 数据目录结构说明**](docs/data-layout.md)：数据文件、资产、运行时数据库与版本号的完整布局。
 - [**English README** 说明文档](docs/README.en.md)
 - [**日本語 README** 说明文档](docs/README.ja.md)
 
